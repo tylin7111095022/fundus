@@ -10,7 +10,7 @@ import pandas as pd
 from torch.nn import BCEWithLogitsLoss
 #custom
 from config.fundusdataset import Fundusdataset, split_dataset
-from config.models import SPNet, ResGCNet
+from config.models import SPNet, ResGCNet, AsymmetricLossOptimized
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -20,9 +20,9 @@ def get_args():
     parser.add_argument("--img_size", type=int, default=512,help="image size")
     parser.add_argument("--nclass", type=int, default=5,help="the number of class for classification task")
     parser.add_argument("--num_workers", type=int, default=8, help="num_workers > 0 turns on multi-process data loading")
-    parser.add_argument("--epoches", type=int, default=10, help="Number of training epochs")
-    parser.add_argument("--batch_size", type=int, default=10, help="Batch size during training")
-    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for optimizer")
+    parser.add_argument("--epoches", type=int, default=50, help="Number of training epochs")
+    parser.add_argument("--batch_size", type=int, default=16, help="Batch size during training")
+    parser.add_argument("--lr", type=float, default=1e-2, help="Learning rate for optimizer")
     parser.add_argument("--weight_path", type=str,dest='wpath', default='.\\best.pth', help="path of model we trained best")
 
     return parser.parse_args()
@@ -57,16 +57,24 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(),lr = hparam.lr, weight_decay=1e-8,)
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=0.5, patience=3, min_lr=1e-6)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    critera = BCEWithLogitsLoss()
+    # criteria = BCEWithLogitsLoss()
+    criteria = AsymmetricLossOptimized()
 
-    #training and evaluate
-    history = training(model,trainset, testset, critera, optimizer,lr_scheduler, device, hparam)
+    #training
+    history = training(model,trainset, testset, criteria, optimizer,lr_scheduler, device, hparam)
+    #plotting
     plot_history(history['train_history'],history['validationn_history'],saved=True)
+
+    fig, ax = plt.subplots(1,1)
+    ax.plot(torch.arange(1,hparam.epoches+1,dtype=torch.int64),history['acc_history'])
+    ax.grid(visible=True)
+    ax.set_ylim(0.0, 1.0)
+    ax.set_title(f"accuracy History")
+    fig.savefig("accuracy")
 
     # evaluate performance of testset
     # best_model = get_model(model_name=hparam.mname,in_ch=hparam.inch,num_class=hparam.nclass)
     # best_model.load_state_dict(torch.load(hparam.wpath))
-    # show_score(model=best_model, dataset=testset, hparam=hparam)
 
     return
 
@@ -74,7 +82,7 @@ def evaluate(model,dataset, loss_fn,predict_threshold:float,device,hparam):
     model.eval()
     model = model.to(device)
     total_loss = 0
-    tp = tn = fp = fn = 0
+    total_acc = []
     dataloader = DataLoader(dataset=dataset,batch_size=hparam.batch_size,shuffle=False)
     for img_data,labels in dataloader:
         img_data = img_data.to(device)
@@ -83,12 +91,17 @@ def evaluate(model,dataset, loss_fn,predict_threshold:float,device,hparam):
         loss = loss_fn(logits,labels)
         total_loss += loss.item()
         predict = torch.sigmoid(logits.detach()).squeeze()
-        mask = predict > predict_threshold # mask 中值為True即為預測值
-        #底下需要再改進，先測試程式能不能正常運行
+        mask = (predict > predict_threshold).to(torch.int64) # mask 中值為True即為預測值
+        labels = labels.to(torch.int64)
+        # print(f"predicts: {mask}")
+        # print(f"label: {labels}")
+        batch_acc = (torch.sum(mask & labels) / torch.sum(mask | labels)).item()
+        total_acc.append(batch_acc)
 
-        mean_loss = total_loss/ ((len(dataset)//hparam.batch_size)+1)
+    mean_loss = total_loss/ ((len(dataset)//hparam.batch_size)+1)
+    acc = round(sum(total_acc) / len(total_acc), 4)
 
-    return mean_loss
+    return mean_loss, acc
 
 def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, hparam):
     model = model.to(device)
@@ -106,6 +119,7 @@ def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, 
     ''')
     train_history = []
     validationn_history = []
+    acc_history = []
 
     for epoch in range(1,hparam.epoches+1):
         model.train()
@@ -123,12 +137,14 @@ def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, 
         logging.info(f'train Loss for epoch {epoch}: {epoch_loss/((len(trainset)//hparam.batch_size)+1):.4f}')
         train_history.append(epoch_loss/((len(trainset)//hparam.batch_size)+1))
 
-        test_mean_loss = evaluate(model=model,dataset=testset,loss_fn=loss_fn,predict_threshold=0.5,device=device,hparam=hparam)
+        test_mean_loss, acc = evaluate(model=model,dataset=testset,loss_fn=loss_fn,predict_threshold=0.5,device=device,hparam=hparam)
         lr_scheduler.step(test_mean_loss) # lr_scheduler 參照 f1 score
 
         validationn_history.append(test_mean_loss)
+        acc_history.append(acc)
         
         logging.info(f'test_mean_loss: {test_mean_loss:.4f}')
+        logging.info(f'testset accuracy: {acc:.4f}')
         #儲存最佳的模型
         if epoch == 1:
             criterion = test_mean_loss
@@ -139,48 +155,7 @@ def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, 
             torch.save(model.state_dict(),hparam.wpath)
             logging.info(f'at epoch {epoch}, BESTMODEL.pth saved!')
 
-    return dict(train_history=train_history, validationn_history=validationn_history)
-
-def show_score(model, dataset, hparam):
-    DELTA = 1e-20 #防止分母為0
-    model.eval()
-    model.to(device='cpu')
-    tp = tn = fp = fn = 0
-    dataloader = DataLoader(dataset=dataset,batch_size=hparam.batch_size,shuffle=False)
-    for data, labels in tqdm(dataloader):
-        labels = labels.squeeze() #變為一軸
-        logits = model(data)
-        probs = torch.softmax(logits.detach(), dim=1).squeeze()
-        predict = torch.argmax(probs, dim=1)
-        for pred,target in zip(predict,labels):
-            if pred == 1 and pred == target:
-                tp += 1
-            elif pred == 1 and pred != target:
-                fp += 1
-            elif pred == 0 and pred == target:
-                tn += 1
-            else:
-                fn += 1
-
-    logging.info(f'''
-    =================
-     TP:{tp}   TN:{tn}
-
-     FP:{fp}   FN:{fn}
-    =================     
-    ''')
-    acc = (tp+tn)/(tp+tn+fp+fn)
-    recall = tp / (tp+fn)
-    precision = tp / (tp+fp)
-    f1score = 2 * (precision*recall) / (recall+precision+DELTA)
-
-    logging.info(f'''
-    accuracy : {acc*100:4.2f} %
-    recall   : {recall*100:4.2f} %
-    precision: {precision*100:4.2f} %
-    F1_score : {f1score*100:4.2f} %
-    ''')
-    return acc,recall,precision,f1score
+    return dict(train_history=train_history, validationn_history=validationn_history, acc_history=acc_history)
 
 def plot_history(trainingloss:list,validationloss:list, saved:bool=False,figname:str='history'):
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize = (12, 6))

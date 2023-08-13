@@ -7,7 +7,7 @@ from pathlib import Path
 import json
 from torchvision import transforms
 
-def get_image_multilabel(root) -> dict:
+def get_image_multilabel(root):
     class_name = os.listdir(root)
     class_ndx_map = {name:idx for idx,name in enumerate(class_name)}
     print(class_ndx_map)
@@ -25,12 +25,12 @@ def get_image_multilabel(root) -> dict:
             ndx = class_ndx_map[os.path.basename(dirname)]
             json_file["img_label"][file][ndx] = 1     
     
-    return json_file
+    return json_file, class_ndx_map
 
 class Fundusdataset(Dataset):
     def __init__(self, dataset_root,transforms=None):
         super(Fundusdataset,self).__init__()
-        self.json_file = get_image_multilabel("fundus_dataset_multilabel_0812")
+        self.json_file, self.class2ndx = get_image_multilabel("fundus_dataset_multilabel_0812")
         self.ndx_key_map = {ndx:key for ndx,key in enumerate(self.json_file["img_label"].keys())}
         self.transforms = transforms
     def __getitem__(self, ndx):
@@ -61,7 +61,7 @@ def split_dataset(dataset:Dataset,test_ratio:float= 0.2,seed:int=20230813):
     return trainset, testset
 
 if __name__ == '__main__':
-    labels = get_image_multilabel("fundus_dataset_multilabel_0812")
+    labels, _ = get_image_multilabel("fundus_dataset_multilabel_0812")
 
     # print(len(labels["img_label"]))
     # print(len(labels["img_path"]))
