@@ -8,6 +8,8 @@ import logging
 import matplotlib.pyplot as plt
 import pandas as pd
 from torch.nn import BCEWithLogitsLoss
+from ultralytics.nn.tasks import ClassificationModel
+import yaml
 #custom
 from config.fundusdataset import Fundusdataset, split_dataset
 from config.models import SPNet, ResGCNet, AsymmetricLossOptimized, initialize_model
@@ -15,13 +17,14 @@ from config.models import SPNet, ResGCNet, AsymmetricLossOptimized, initialize_m
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_name", type=str, dest='mname', default='squeezenet', help='deep learning model will be used')
+    parser.add_argument("--model_name", type=str, dest='mname', default='yolov8', help='deep learning model will be used')
+    parser.add_argument("--optim", type=str, default='AdamW', help='optimizer')
     parser.add_argument("--in_channel", type=int, default=3, dest="inch",help="the number of input channel of model")
-    parser.add_argument("--img_size", type=int, default=512,help="image size")
+    parser.add_argument("--img_size", type=int, default=1024,help="image size")
     parser.add_argument("--nclass", type=int, default=5,help="the number of class for classification task")
     parser.add_argument("--num_workers", type=int, default=8, help="num_workers > 0 turns on multi-process data loading")
-    parser.add_argument("--epoches", type=int, default=50, help="Number of training epochs")
-    parser.add_argument("--batch_size", type=int, default=8, help="Batch size during training")
+    parser.add_argument("--epoches", type=int, default=80, help="Number of training epochs")
+    parser.add_argument("--batch_size", type=int, default=16, help="Batch size during training")
     parser.add_argument("--lr", type=float, default=1e-2, help="Learning rate for optimizer")
     parser.add_argument("--threshold", type=float, default=0.3, dest="thresh",help="the threshold of that predicting if belong the class")
     parser.add_argument("--weight_path", type=str,dest='wpath', default='.\\best.pth', help="path of model we trained best")
@@ -52,12 +55,13 @@ def main():
     pipe = transforms.Compose([transforms.Resize((hparam.img_size,hparam.img_size))])
     DATASET = Fundusdataset("fundus_dataset_multilabel_0812",transforms=pipe)
     trainset, testset = split_dataset(DATASET,test_ratio=0.2,seed=20230813)
-    
+
     # model = get_model(model_name=hparam.mname,in_ch=hparam.inch,img_shape=(hparam.img_size,hparam.img_size),num_class=hparam.nclass)
-    model, _ = initialize_model(hparam.mname,num_classes=hparam.nclass)
+    model = initialize_model(hparam.mname,num_classes=hparam.nclass,use_pretrained=True)
+    
     logging.info(model)
-    optimizer = torch.optim.Adam(model.parameters(),lr = hparam.lr, weight_decay=1e-8,)
-    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=0.5, patience=5, min_lr=1e-5)
+    optimizer = get_optim(optim_name=hparam.optim,model=model,lr=hparam.lr)
+    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=0.5, patience=3, min_lr=1e-6)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     criteria = BCEWithLogitsLoss()
     # criteria = AsymmetricLossOptimized()
@@ -116,6 +120,7 @@ def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, 
 
     logging.info(f'''Starting training:
         Model:          {hparam.mname}
+        Optimizer:      {hparam.optim}
         Epochs:         {hparam.epoches}
         Batch size:     {hparam.batch_size}
         Training size:  {len(trainset)}
@@ -189,6 +194,26 @@ def get_model(model_name:str, in_ch=2,filters=32,num_class=5,img_shape:tuple=(20
         return ResGCNet(in_ch=in_ch, num_class=num_class,img_shape=img_shape,filters=filters)
     else:
         print(f'Don\'t find the model: {model_name} .')
+
+def get_optim(optim_name:str, model, lr:float):
+    """optim_name = [adam | adamw | sgd | rmsprop | adagrad"""
+    optim_name = optim_name.lower()
+    if optim_name == "adam":
+        return torch.optim.Adam(model.parameters(),lr = lr)
+    elif optim_name == "adamw":
+        return torch.optim.AdamW(model.parameters(),lr = lr)
+    elif optim_name == "sgd":
+        return torch.optim.SGD(model.parameters(),lr = lr)
+    elif optim_name == "rmsprop":
+        return torch.optim.RMSprop(model.parameters(),lr = lr)
+    elif optim_name == "adagrad":
+        return torch.optim.Adagrad(model.parameters(),lr = lrr)
+    else:
+        print(f'Don\'t find the model: {optim_name} . default optimizer is adam')
+        return torch.optim.Adam(model.parameters(),lr = hparam.lr)
+
+    
+
 
 
 if __name__ == '__main__':

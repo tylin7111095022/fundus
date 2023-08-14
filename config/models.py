@@ -12,6 +12,7 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 from torchvision import models
+from ultralytics.nn.tasks import ClassificationModel
 
 class Swish(nn.Module):
     def __init__(self,inplace=True):
@@ -347,8 +348,6 @@ def initialize_model(model_name, num_classes,use_custom_clf=True, use_pretrained
         else:
             model_ft.fc = nn.Linear(num_ftrs, num_classes)
 
-        input_size = 224
-
     elif model_name == "resnet152":
         """ Resnet152
         """
@@ -358,7 +357,6 @@ def initialize_model(model_name, num_classes,use_custom_clf=True, use_pretrained
             model_ft.fc = Classifier(num_ftrs, num_classes,reduction_rate=4)
         else:
             model_ft.fc = nn.Linear(num_ftrs, num_classes)
-        input_size = 224
 
     elif model_name == "alexnet":
         """ Alexnet
@@ -369,7 +367,6 @@ def initialize_model(model_name, num_classes,use_custom_clf=True, use_pretrained
             model_ft.classifier[6] = Classifier(num_ftrs, num_classes,reduction_rate=4)
         else:
             model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)
-        input_size = 224
 
     elif model_name == "vgg":
         """ VGG11_bn
@@ -380,7 +377,6 @@ def initialize_model(model_name, num_classes,use_custom_clf=True, use_pretrained
             model_ft.classifier[6] = Classifier(num_ftrs, num_classes,reduction_rate=4)
         else:
             model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)
-        input_size = 224
 
     elif model_name == "squeezenet":
         """ Squeezenet
@@ -388,7 +384,6 @@ def initialize_model(model_name, num_classes,use_custom_clf=True, use_pretrained
         model_ft = models.squeezenet1_0(pretrained=use_pretrained)
         model_ft.classifier[1] = nn.Conv2d(512, num_classes, kernel_size=(1,1), stride=(1,1))
         model_ft.num_classes = num_classes
-        input_size = 224
 
     elif model_name == "densenet":
         """ Densenet
@@ -399,7 +394,6 @@ def initialize_model(model_name, num_classes,use_custom_clf=True, use_pretrained
             model_ft.classifier = Classifier(num_ftrs, num_classes,reduction_rate=4)
         else:
             model_ft.classifier = nn.Linear(num_ftrs, num_classes)
-        input_size = 224
 
     elif model_name == "inception":
         """ Inception v3
@@ -415,14 +409,28 @@ def initialize_model(model_name, num_classes,use_custom_clf=True, use_pretrained
             model_ft.fc = Classifier(num_ftrs, num_classes,reduction_rate=4)
         else:
             model_ft.fc = nn.Linear(num_ftrs,num_classes)
-        input_size = 299
+    
+    elif model_name == "yolov8":
+        """Yolov8 by ultralytic, please install the mudule ultralytic first"""
+        if use_pretrained:
+            model_obj = ClassificationModel(cfg='yolov8n-cls.yaml', # build a new model from YAML
+                                        model=None,ch=3,
+                                        nc= num_classes,
+                                        cutoff=10,verbose=True)
+            model_ft = model_obj.model.cpu()
+            model_ft.load_state_dict(torch.load("yolov8n-cls.pt",map_location='cpu'),strict=False)
+        else:
+            model_obj = ClassificationModel(cfg='yolov8n-cls.yaml', # build a new model from YAML
+                                        model=None,ch=3,
+                                        nc= num_classes,
+                                        cutoff=10,verbose=True)  
+            model_ft = model_obj.model
 
     else:
         print("Invalid model name, exiting...")
         exit()
 
-    return model_ft, input_size
-
+    return model_ft
     
 if __name__ == '__main__':
     ResGCmodel = ResGCNet(in_ch=3,num_class=2,filters=32,img_shape=(224,224))
