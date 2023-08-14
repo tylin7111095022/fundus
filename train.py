@@ -11,7 +11,7 @@ from torch.nn import BCEWithLogitsLoss
 from ultralytics.nn.tasks import ClassificationModel
 import yaml
 #custom
-from config.fundusdataset import Fundusdataset, split_dataset
+from config.fundusdataset import Fundusdataset
 from config.models import SPNet, ResGCNet, AsymmetricLossOptimized, initialize_model
 
 def get_args():
@@ -20,11 +20,11 @@ def get_args():
     parser.add_argument("--model_name", type=str, dest='mname', default='yolov8', help='deep learning model will be used')
     parser.add_argument("--optim", type=str, default='AdamW', help='optimizer')
     parser.add_argument("--in_channel", type=int, default=3, dest="inch",help="the number of input channel of model")
-    parser.add_argument("--img_size", type=int, default=1024,help="image size")
+    parser.add_argument("--img_size", type=int, default=512,help="image size")
     parser.add_argument("--nclass", type=int, default=5,help="the number of class for classification task")
     parser.add_argument("--num_workers", type=int, default=8, help="num_workers > 0 turns on multi-process data loading")
-    parser.add_argument("--epoches", type=int, default=80, help="Number of training epochs")
-    parser.add_argument("--batch_size", type=int, default=16, help="Batch size during training")
+    parser.add_argument("--epoches", type=int, default=50, help="Number of training epochs")
+    parser.add_argument("--batch_size", type=int, default=32, help="Batch size during training")
     parser.add_argument("--lr", type=float, default=1e-2, help="Learning rate for optimizer")
     parser.add_argument("--threshold", type=float, default=0.3, dest="thresh",help="the threshold of that predicting if belong the class")
     parser.add_argument("--weight_path", type=str,dest='wpath', default='.\\best.pth', help="path of model we trained best")
@@ -53,8 +53,11 @@ def main():
 
     #資料隨機分選訓練、測試集
     pipe = transforms.Compose([transforms.Resize((hparam.img_size,hparam.img_size))])
-    DATASET = Fundusdataset("fundus_dataset_multilabel_0812",transforms=pipe)
-    trainset, testset = split_dataset(DATASET,test_ratio=0.2,seed=20230813)
+    # DATASET = Fundusdataset("fundus_dataset_balance",transforms=pipe)
+    trainset = Fundusdataset("train",transforms=pipe)
+    testset = Fundusdataset("val",transforms=pipe)
+    print(trainset.class2ndx)
+    print(testset.class2ndx)
 
     # model = get_model(model_name=hparam.mname,in_ch=hparam.inch,img_shape=(hparam.img_size,hparam.img_size),num_class=hparam.nclass)
     model = initialize_model(hparam.mname,num_classes=hparam.nclass,use_pretrained=True)
@@ -100,13 +103,13 @@ def evaluate(model,dataset, loss_fn,device,hparam):
         mask = (predict > hparam.thresh).to(torch.int64) # mask 中值為True即為預測值
         labels = labels.to(torch.int64)
         batch_acc = (torch.sum(mask & labels).item()) / (torch.sum(mask | labels).item())
-        # print(f"after sigmoid: \n{predict}")
-        # print(f"predicts: \n{mask}")
-        # print(f"label: \n{labels}")
+        print(f"after sigmoid: \n{predict}")
+        print(f"predicts: \n{mask}")
+        print(f"label: \n{labels}")
         # print(f"predicts & labels: \n{mask & labels}")
         # print(f"mask | labels: \n{mask | labels}")
         # print(f"batch_acc: {batch_acc}")
-        # print(f"="*40)
+        print(f"="*40)
         total_acc.append(batch_acc)
 
     mean_loss = total_loss/ ((len(dataset)//hparam.batch_size)+1)

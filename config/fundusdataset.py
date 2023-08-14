@@ -29,11 +29,11 @@ def get_image_multilabel(root):
 class Fundusdataset(Dataset):
     def __init__(self, dataset_root,transforms=None):
         super(Fundusdataset,self).__init__()
-        self.json_file, self.class2ndx = get_image_multilabel("fundus_dataset_multilabel_0812")
-        self.ndx2class = {ndx:key for ndx,key in enumerate(self.json_file["img_label"].keys())}
+        self.json_file, self.class2ndx = get_image_multilabel(dataset_root)
+        self.ndx2img = {ndx:key for ndx,key in enumerate(self.json_file["img_label"].keys())}
         self.transforms = transforms
     def __getitem__(self, ndx):
-        key = self.ndx2class[ndx]
+        key = self.ndx2img[ndx]
         imgpath = self.json_file["img_path"][key]
         img = cv2.imread(imgpath)
         img = img / 255 #limit the value to [0, 1]
