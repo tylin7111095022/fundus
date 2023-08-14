@@ -9,8 +9,7 @@ from torchvision import transforms
 
 def get_image_multilabel(root):
     class_name = os.listdir(root)
-    class_ndx_map = {name:idx for idx,name in enumerate(class_name)}
-    print(class_ndx_map)
+    class2ndx = {name:idx for idx,name in enumerate(class_name)}
     num_class = len(class_name)
 
     json_file = {}
@@ -22,19 +21,19 @@ def get_image_multilabel(root):
                 # json_file["img_name"][file] = torch.zeros(num_class)
                 json_file["img_label"][file] = [0 for i in range(num_class)]
                 json_file["img_path"][file] = os.path.join(dirname, file) #當img_name第一次被讀取時建立該image的路徑，避免圖片被重複讀取
-            ndx = class_ndx_map[os.path.basename(dirname)]
+            ndx = class2ndx[os.path.basename(dirname)]
             json_file["img_label"][file][ndx] = 1     
     
-    return json_file, class_ndx_map
+    return json_file, class2ndx
 
 class Fundusdataset(Dataset):
     def __init__(self, dataset_root,transforms=None):
         super(Fundusdataset,self).__init__()
         self.json_file, self.class2ndx = get_image_multilabel("fundus_dataset_multilabel_0812")
-        self.ndx_key_map = {ndx:key for ndx,key in enumerate(self.json_file["img_label"].keys())}
+        self.ndx2class = {ndx:key for ndx,key in enumerate(self.json_file["img_label"].keys())}
         self.transforms = transforms
     def __getitem__(self, ndx):
-        key = self.ndx_key_map[ndx]
+        key = self.ndx2class[ndx]
         imgpath = self.json_file["img_path"][key]
         img = cv2.imread(imgpath)
         img = img / 255 #limit the value to [0, 1]
@@ -71,7 +70,5 @@ if __name__ == '__main__':
 
     dataset = Fundusdataset("fundus_dataset_multilabel_0812",transforms=pipe)
     trainset, testset = split_dataset(dataset,test_ratio=0.2)
-    print(trainset[0][0])
-    print(trainset[0][0].shape)
-    print(trainset[0][1])
+    print(dataset.class2ndx)
     
