@@ -1,5 +1,3 @@
-#!/opt/conda/bin/python
-
 import os
 import random
 import shutil
@@ -19,8 +17,8 @@ train_dir = os.path.join(dataset_path,"train")
 val_dir =  os.path.join(dataset_path,"val")
 test_dir =  os.path.join(dataset_path,"test")
 train_ratio = 0.8
-val_ratio = 0.1
-test_ratio = 0.1
+val_ratio = 0.0
+test_ratio = 0.2
 
 class_dict = {}
 for dirname, dirs, files in os.walk(dataset_path):
@@ -33,7 +31,7 @@ for dirname, dirs, files in os.walk(dataset_path):
 try:
     del class_dict[dataset_path] # delete the key of current dirextory
 except:
-    print("./ don\'t exist.")
+    print(f"{dataset_path} don\'t exist.")
 
 # 看每個目錄底下各自有多少檔案
 for dir in class_dict.keys():

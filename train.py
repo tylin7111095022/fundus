@@ -24,9 +24,9 @@ def get_args():
     parser.add_argument("--nclass", type=int, default=5,help="the number of class for classification task")
     parser.add_argument("--num_workers", type=int, default=8, help="num_workers > 0 turns on multi-process data loading")
     parser.add_argument("--epoches", type=int, default=50, help="Number of training epochs")
-    parser.add_argument("--batch_size", type=int, default=32, help="Batch size during training")
+    parser.add_argument("--batch_size", type=int, default=36, help="Batch size during training")
     parser.add_argument("--lr", type=float, default=1e-2, help="Learning rate for optimizer")
-    parser.add_argument("--threshold", type=float, default=0.3, dest="thresh",help="the threshold of that predicting if belong the class")
+    parser.add_argument("--threshold", type=float, default=0.5, dest="thresh",help="the threshold of that predicting if belong the class")
     parser.add_argument("--weight_path", type=str,dest='wpath', default='.\\best.pth', help="path of model we trained best")
 
     return parser.parse_args()
@@ -53,9 +53,8 @@ def main():
 
     #資料隨機分選訓練、測試集
     pipe = transforms.Compose([transforms.Resize((hparam.img_size,hparam.img_size))])
-    # DATASET = Fundusdataset("fundus_dataset_balance",transforms=pipe)
     trainset = Fundusdataset("train",transforms=pipe)
-    testset = Fundusdataset("val",transforms=pipe)
+    testset = Fundusdataset("test",transforms=pipe)
     print(trainset.class2ndx)
     print(testset.class2ndx)
 
@@ -103,13 +102,13 @@ def evaluate(model,dataset, loss_fn,device,hparam):
         mask = (predict > hparam.thresh).to(torch.int64) # mask 中值為True即為預測值
         labels = labels.to(torch.int64)
         batch_acc = (torch.sum(mask & labels).item()) / (torch.sum(mask | labels).item())
-        print(f"after sigmoid: \n{predict}")
-        print(f"predicts: \n{mask}")
-        print(f"label: \n{labels}")
+        # print(f"after sigmoid: \n{predict}")
+        # print(f"predicts: \n{mask}")
+        # print(f"label: \n{labels}")
         # print(f"predicts & labels: \n{mask & labels}")
         # print(f"mask | labels: \n{mask | labels}")
         # print(f"batch_acc: {batch_acc}")
-        print(f"="*40)
+        # print(f"="*40)
         total_acc.append(batch_acc)
 
     mean_loss = total_loss/ ((len(dataset)//hparam.batch_size)+1)
@@ -144,7 +143,7 @@ def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, 
         for img_data, labels in tqdm(dataloader):
             img_data = img_data.to(device)
             labels = labels.to(device).squeeze()
-            logits = model(img_data)
+            logits = model(img_data).squeeze()
             loss = loss_fn(logits,labels)
             epoch_loss += loss.item()
             optimizer.zero_grad()
@@ -154,14 +153,16 @@ def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, 
         logging.info(f'train Loss for epoch {epoch}: {epoch_loss/((len(trainset)//hparam.batch_size)+1):.4f}')
         train_history.append(epoch_loss/((len(trainset)//hparam.batch_size)+1))
 
-        test_mean_loss, acc = evaluate(model=model,dataset=testset,loss_fn=loss_fn,device=device,hparam=hparam)
-        lr_scheduler.step(test_mean_loss) # lr_scheduler 參照 f1 score
+        test_mean_loss, overallacc = evaluate(model=model,dataset=testset,loss_fn=loss_fn,device=device,hparam=hparam)
+        every_class_acc = acc_every_class(dataset=testset,model=model,thresh=hparam.thresh)
+        logging.info(f"every class accuracy{every_class_acc}")
+        lr_scheduler.step(test_mean_loss) # lr_scheduler 參照 test_mean_loss
 
         validationn_history.append(test_mean_loss)
-        acc_history.append(acc)
+        acc_history.append(overallacc)
         
         logging.info(f'test_mean_loss: {test_mean_loss:.4f}')
-        logging.info(f'testset accuracy: {acc:.4f}')
+        logging.info(f'testset accuracy: {overallacc:.4f}')
         #儲存最佳的模型
         if epoch == 1:
             criterion = test_mean_loss
@@ -215,21 +216,33 @@ def get_optim(optim_name:str, model, lr:float):
         print(f'Don\'t find the model: {optim_name} . default optimizer is adam')
         return torch.optim.Adam(model.parameters(),lr = hparam.lr)
 
+def acc_every_class(dataset:[str|Fundusdataset],model, thresh:float=0.5, transforms=None,)->dict:
     
+    if isinstance (dataset,str):
+        ds = Fundusdataset(dataset,transforms=transforms)
+    else:
+        ds = dataset
+    class2ndx = ds.class2ndx
+    ndx2class = {v:k for k,v in class2ndx.items()}
+    acc_dict = {}
+    count_t = torch.zeros(len(class2ndx),dtype=torch.int64)
+    for i in range(len(ds)):
+        img = ds[i][0].unsqueeze(0) #加入批次軸為了預測
+        img = img.cuda()
+        prob = torch.sigmoid(model(img)).squeeze() #去掉batch軸
+        predict = (prob > thresh).to(torch.int64)
+        label = ds[i][1]
+        label = label.cuda()
+        for j in range(len(label)):
+            if predict[j] == label[j]:
+                count_t[j] += 1
 
+    count_t = count_t.to(torch.float32) / len(ds)
+    for i in range(len(count_t)):
+        acc_dict[ndx2class[i]] = round(count_t[i].item(),4)
 
+    return acc_dict
+    
 
 if __name__ == '__main__':
     main()
-    # gradcam
-    # hparam = get_args()
-    # df = pd.read_csv('labels\ph1_label.csv')
-    # model = get_model(model_name=hparam.mname)
-    # model.load_state_dict(torch.load('PH1_BESTMODEL.pth'))
-    # gradcam = GradCam(model=model)
-    # datafolder = 'ph1_data'
-
-    # for ndx,i in enumerate(df['Filename']):
-    #     gradcam.plot_heatmap(os.path.join(datafolder,i),saved_folder='gradCAM_image')
-    #     if ndx % 10 == 0:
-    #         plt.close('all')
