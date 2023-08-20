@@ -3,7 +3,7 @@ import random
 import shutil
 import sys
 
-random.seed(20230814)
+random.seed(20230819)
 if len(sys.argv) < 2 :
     print("give the root of dataset which you want to preprocess")
     sys.exit()

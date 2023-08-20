@@ -12,6 +12,7 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 from torchvision import models
+# 當創建新環境時，需要將ultralytics/nn/modules內的Classify class做更動
 from ultralytics.nn.tasks import ClassificationModel
 
 class Swish(nn.Module):
@@ -431,6 +432,23 @@ def initialize_model(model_name, num_classes,use_custom_clf=True, use_pretrained
         exit()
 
     return model_ft
+
+def get_optim(optim_name:str, model, lr:float):
+    """optim_name = [adam | adamw | sgd | rmsprop | adagrad"""
+    optim_name = optim_name.lower()
+    if optim_name == "adam":
+        return torch.optim.Adam(model.parameters(),lr = lr)
+    elif optim_name == "adamw":
+        return torch.optim.AdamW(model.parameters(),lr = lr)
+    elif optim_name == "sgd":
+        return torch.optim.SGD(model.parameters(),lr = lr)
+    elif optim_name == "rmsprop":
+        return torch.optim.RMSprop(model.parameters(),lr = lr)
+    elif optim_name == "adagrad":
+        return torch.optim.Adagrad(model.parameters(),lr = lr)
+    else:
+        print(f'Don\'t find the model: {optim_name} . default optimizer is adam')
+        return torch.optim.Adam(model.parameters(),lr = lr)
     
 if __name__ == '__main__':
     ResGCmodel = ResGCNet(in_ch=3,num_class=2,filters=32,img_shape=(224,224))
