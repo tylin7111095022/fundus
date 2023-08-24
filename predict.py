@@ -5,6 +5,8 @@ import sys
 import torch
 import argparse
 from torchvision import transforms
+import warnings
+warnings.filterwarnings('ignore')
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -12,17 +14,17 @@ def get_args():
     parser.add_argument("--in_channel", type=int, default=3, dest="inch",help="the number of input channel of model")
     parser.add_argument("-img","--image_path", type=str, dest="img", default='./demoimg.JPG', help='deep learning model will be used')
     parser.add_argument("--img_size", type=int, default=1024,help="image size")
-    parser.add_argument("--nclass", type=int, default=5,help="the number of class for classification task")
+    parser.add_argument("--nclass", type=int, default=6,help="the number of class for classification task")
     parser.add_argument("--threshold", type=float, default=0.5, dest="thresh",help="the threshold of that predicting if belong the class")
-    parser.add_argument("--weight_path", type=str,dest='wpath', default='./best.pth', help="path of model we want to load")
+    parser.add_argument("--weight_path", type=str,dest='wpath', default='./log/train1/best.pth', help="path of model we want to load")
     parser.add_argument("--show", type=bool, default=False, dest="show",help="decide whether show image or not")
 
     return parser.parse_args()
 
 def main():
     hparam = get_args()
-    TRANSPIPE = transforms.Compose([transforms.Resize((hparam.img_size,hparam.img_size))])
-    prob, ans = predict(hparam.img, transforms=TRANSPIPE,show_img=hparam.show)
+    # TRANSPIPE = transforms.Compose([transforms.Resize((hparam.img_size,hparam.img_size))])
+    prob, ans = predict(hparam.img,show_img=hparam.show)
     print(f"image is {hparam.img}")
     print(f"prob is {prob}")
     print(f"threshold is {hparam.thresh}")

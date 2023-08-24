@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from torch.nn import BCEWithLogitsLoss
 import yaml
 #custom
-from config.fundusdataset import Fundusdataset
+from config.fundusdataset import Fundusdataset, split_dataset
 from config.models import SPNet, ResGCNet, AsymmetricLossOptimized, initialize_model, get_optim
 
 def get_args():
@@ -20,10 +20,10 @@ def get_args():
     parser.add_argument("--optim", type=str, default='AdamW', help='optimizer')
     parser.add_argument("--in_channel", type=int, default=3, dest="inch",help="the number of input channel of model")
     parser.add_argument("--img_size", type=int, default=1024,help="image size")
-    parser.add_argument("--nclass", type=int, default=5,help="the number of class for classification task")
+    parser.add_argument("--nclass", type=int, default=6,help="the number of class for classification task")
     parser.add_argument("--num_workers", type=int, default=8, help="num_workers > 0 turns on multi-process data loading")
     parser.add_argument("--epoches", type=int, default=50, help="Number of training epochs")
-    parser.add_argument("--batch_size", type=int, default=8, help="Batch size during training")
+    parser.add_argument("--batch_size", type=int, default=15, help="Batch size during training")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for optimizer")
     parser.add_argument("--threshold", type=float, default=0.5, dest="thresh",help="the threshold of that predicting if belong the class")
     parser.add_argument("--weight_path", type=str,dest='wpath', default='./best.pth', help="path of model we trained best")
@@ -51,12 +51,12 @@ def main():
     logger.addHandler(fh)
     
     hparam = get_args()
-    TRANSPIPE = transforms.Compose([transforms.Resize((hparam.img_size,hparam.img_size))])
+    # TRANSPIPE = transforms.Compose([transforms.Resize((hparam.img_size,hparam.img_size))])
 
     #資料隨機分選訓練、測試集
-    trainset = Fundusdataset("train",transforms=TRANSPIPE)
-    testset = Fundusdataset("test",transforms=TRANSPIPE)
-    logging.info(trainset.class2ndx)
+    fundus_dataset = Fundusdataset("fundus_dataset_multilabel",transforms=None, imgsize=hparam.img_size)
+    trainset, testset = split_dataset(fundus_dataset,test_ratio=0.2,seed=20230823)
+    logging.info(fundus_dataset.class2ndx)
     # 計算每個標籤的正負樣本比
     if hparam.wl:
         pos_count = torch.zeros(hparam.nclass)
@@ -237,7 +237,7 @@ def acc_every_class(dataset:[str | Fundusdataset],model, device, thresh:float=0.
         ds = Fundusdataset(dataset,transforms=transforms)
     else:
         ds = dataset
-    class2ndx = ds.class2ndx
+    class2ndx = ds.dataset.class2ndx
     ndx2class = {v:k for k,v in class2ndx.items()}
     acc_dict = {}
     count_t = torch.zeros(len(class2ndx),dtype=torch.int64)
