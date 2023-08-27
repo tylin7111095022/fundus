@@ -45,11 +45,14 @@ class Padding(object):
         return pad_img
     
 if __name__ == "__main__":
-    resize = Resize(base_size=1024,fix_ratio=True)
+    resize = Resize(base_size=512,fix_ratio=True)
+    nofix = Resize(base_size=512,fix_ratio=False)
     padding = Padding(padding_value=0)
-    img = cv2.imread("test2.JPG")
-    cv2.imwrite("orig.jpg",img)
+    img = cv2.imread("../test2.JPG")
+    # cv2.imwrite("orig.jpg",img)
     after = resize(img)
     after = padding(after)
-    cv2.imwrite("after.jpg",after)
+    nofixresize = nofix(img)
+    # cv2.imwrite("after.jpg",after)
+    cv2.imwrite("nofix.jpg",nofixresize)
             

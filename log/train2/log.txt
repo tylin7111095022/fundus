@@ -1,0 +1,817 @@
+INFO: {'Normal': 0, 'Maculopathy': 1, 'DR': 2, 'RD': 3, 'MH': 4, 'PH': 5}
+INFO: pos_weights: tensor([ 7.8214,  1.3750,  1.8391,  4.6136, 12.0000,  2.0122], device='cuda:2')
+INFO: Sequential(
+  (0): Conv(
+    (conv): Conv2d(3, 16, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (1): Conv(
+    (conv): Conv2d(16, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (2): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(32, 32, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(48, 32, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0): Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (3): Conv(
+    (conv): Conv2d(32, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (4): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(128, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0-1): 2 x Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (5): Conv(
+    (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (6): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0-1): 2 x Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (7): Conv(
+    (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (8): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(384, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0): Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (9): Classify(
+    (conv): Conv(
+      (conv): Conv2d(256, 1280, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(1280, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (pool): AdaptiveAvgPool2d(output_size=1)
+    (drop): Dropout(p=0.0, inplace=True)
+    (linear): Linear(in_features=1280, out_features=6, bias=True)
+  )
+)
+INFO: Starting training:
+        Model:          yolov8
+        Optimizer:      AdamW
+        Epochs:         50
+        Batch size:     1
+        Training size:  247
+        Testing size:   61
+        Image size:     1024
+        Device:         cuda
+        Initial learning rate:  0.001
+        Predict class threshold:0.5
+    
+INFO: {'Normal': 0, 'Maculopathy': 1, 'DR': 2, 'RD': 3, 'MH': 4, 'PH': 5}
+INFO: train Loss for epoch 1: 1.0955
+INFO: pos_weights: tensor([ 7.8214,  1.3750,  1.8391,  4.6136, 12.0000,  2.0122], device='cuda:2')
+INFO: Sequential(
+  (0): Conv(
+    (conv): Conv2d(3, 16, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (1): Conv(
+    (conv): Conv2d(16, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (2): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(32, 32, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(48, 32, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0): Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (3): Conv(
+    (conv): Conv2d(32, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (4): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(128, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0-1): 2 x Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (5): Conv(
+    (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (6): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0-1): 2 x Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (7): Conv(
+    (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (8): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(384, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0): Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (9): Classify(
+    (conv): Conv(
+      (conv): Conv2d(256, 1280, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(1280, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (pool): AdaptiveAvgPool2d(output_size=1)
+    (drop): Dropout(p=0.0, inplace=True)
+    (linear): Linear(in_features=1280, out_features=6, bias=True)
+  )
+)
+INFO: Starting training:
+        Model:          yolov8
+        Optimizer:      AdamW
+        Epochs:         50
+        Batch size:     1
+        Training size:  247
+        Testing size:   61
+        Image size:     1024
+        Device:         cuda
+        Initial learning rate:  0.001
+        Predict class threshold:0.5
+    
+INFO: every class accuracy{'Normal': 0.2131, 'Maculopathy': 0.377, 'DR': 0.2951, 'RD': 0.7869, 'MH': 0.0656, 'PH': 0.5574}
+INFO: test_mean_loss: 1.1741
+INFO: testset accuracy: 0.3825
+INFO: intersection over union: 0.2164
+INFO: at epoch 1, BESTMODEL.pth saved!
+INFO: train Loss for epoch 2: 1.0732
+INFO: train Loss for epoch 1: 1.0828
+INFO: every class accuracy{'Normal': 0.2459, 'Maculopathy': 0.6066, 'DR': 0.6557, 'RD': 0.7049, 'MH': 0.459, 'PH': 0.7541}
+INFO: test_mean_loss: 1.0509
+INFO: testset accuracy: 0.5710
+INFO: intersection over union: 0.2107
+INFO: at epoch 2, BESTMODEL.pth saved!
+INFO: every class accuracy{'Normal': 0.1639, 'Maculopathy': 0.5246, 'DR': 0.4918, 'RD': 0.3934, 'MH': 0.0656, 'PH': 0.2459}
+INFO: test_mean_loss: 1.2060
+INFO: testset accuracy: 0.3142
+INFO: intersection over union: 0.1844
+INFO: at epoch 1, BESTMODEL.pth saved!
+INFO: train Loss for epoch 3: 1.0611
+INFO: train Loss for epoch 2: 1.0571
+INFO: every class accuracy{'Normal': 0.8361, 'Maculopathy': 0.6393, 'DR': 0.2951, 'RD': 0.2131, 'MH': 0.2951, 'PH': 0.2459}
+INFO: test_mean_loss: 1.0528
+INFO: testset accuracy: 0.4208
+INFO: intersection over union: 0.2038
+INFO: every class accuracy{'Normal': 0.8361, 'Maculopathy': 0.5902, 'DR': 0.623, 'RD': 0.2131, 'MH': 0.0656, 'PH': 0.3934}
+INFO: test_mean_loss: 1.0692
+INFO: testset accuracy: 0.4536
+INFO: intersection over union: 0.1672
+INFO: at epoch 2, BESTMODEL.pth saved!
+INFO: train Loss for epoch 4: 1.0482
+INFO: train Loss for epoch 3: 1.0445
+INFO: every class accuracy{'Normal': 0.8361, 'Maculopathy': 0.3607, 'DR': 0.2951, 'RD': 0.7869, 'MH': 0.9344, 'PH': 0.2459}
+INFO: test_mean_loss: 1.3602
+INFO: testset accuracy: 0.5765
+INFO: intersection over union: 0.3005
+INFO: every class accuracy{'Normal': 0.8361, 'Maculopathy': 0.3607, 'DR': 0.6557, 'RD': 0.2131, 'MH': 0.8852, 'PH': 0.2459}
+INFO: test_mean_loss: 1.2095
+INFO: testset accuracy: 0.5328
+INFO: intersection over union: 0.2432
+INFO: train Loss for epoch 5: 1.0618
+INFO: train Loss for epoch 4: 1.0643
+INFO: every class accuracy{'Normal': 0.8361, 'Maculopathy': 0.4262, 'DR': 0.5246, 'RD': 0.2131, 'MH': 0.0656, 'PH': 0.2459}
+INFO: test_mean_loss: 1.0554
+INFO: testset accuracy: 0.3852
+INFO: intersection over union: 0.2074
+INFO: every class accuracy{'Normal': 0.5574, 'Maculopathy': 0.3279, 'DR': 0.7705, 'RD': 0.5246, 'MH': 0.6557, 'PH': 0.4098}
+INFO: test_mean_loss: 1.5948
+INFO: testset accuracy: 0.5410
+INFO: intersection over union: 0.2374
+INFO: train Loss for epoch 6: 1.0401
+INFO: train Loss for epoch 5: 1.0353
+INFO: every class accuracy{'Normal': 0.459, 'Maculopathy': 0.5738, 'DR': 0.4918, 'RD': 0.2131, 'MH': 0.3607, 'PH': 0.6557}
+INFO: test_mean_loss: 1.0207
+INFO: testset accuracy: 0.4590
+INFO: intersection over union: 0.2208
+INFO: at epoch 6, BESTMODEL.pth saved!
+INFO: every class accuracy{'Normal': 0.6066, 'Maculopathy': 0.3279, 'DR': 0.8033, 'RD': 0.4426, 'MH': 0.7705, 'PH': 0.377}
+INFO: test_mean_loss: 1.8760
+INFO: testset accuracy: 0.5546
+INFO: intersection over union: 0.2470
+INFO: train Loss for epoch 7: 1.0340
+INFO: train Loss for epoch 6: 1.0212
+INFO: every class accuracy{'Normal': 0.7541, 'Maculopathy': 0.459, 'DR': 0.5574, 'RD': 0.3115, 'MH': 0.2131, 'PH': 0.4426}
+INFO: test_mean_loss: 1.0703
+INFO: testset accuracy: 0.4563
+INFO: intersection over union: 0.1623
+INFO: every class accuracy{'Normal': 0.6393, 'Maculopathy': 0.3443, 'DR': 0.7705, 'RD': 0.459, 'MH': 0.1803, 'PH': 0.5246}
+INFO: test_mean_loss: 1.8516
+INFO: testset accuracy: 0.4863
+INFO: intersection over union: 0.2197
+INFO: train Loss for epoch 8: 1.0487
+INFO: train Loss for epoch 7: 0.9920
+INFO: every class accuracy{'Normal': 0.7705, 'Maculopathy': 0.5738, 'DR': 0.6885, 'RD': 0.4426, 'MH': 0.9344, 'PH': 0.7541}
+INFO: test_mean_loss: 1.0191
+INFO: testset accuracy: 0.6940
+INFO: intersection over union: 0.3530
+INFO: at epoch 8, BESTMODEL.pth saved!
+INFO: every class accuracy{'Normal': 0.5574, 'Maculopathy': 0.459, 'DR': 0.7213, 'RD': 0.5082, 'MH': 0.082, 'PH': 0.541}
+INFO: test_mean_loss: 1.6455
+INFO: testset accuracy: 0.4781
+INFO: intersection over union: 0.2085
+INFO: train Loss for epoch 9: 1.0365
+INFO: train Loss for epoch 8: 0.9776
+INFO: every class accuracy{'Normal': 0.8361, 'Maculopathy': 0.541, 'DR': 0.6557, 'RD': 0.4426, 'MH': 0.0656, 'PH': 0.377}
+INFO: test_mean_loss: 1.0352
+INFO: testset accuracy: 0.4863
+INFO: intersection over union: 0.2303
+INFO: every class accuracy{'Normal': 0.4262, 'Maculopathy': 0.623, 'DR': 0.623, 'RD': 0.5902, 'MH': 0.0984, 'PH': 0.5902}
+INFO: test_mean_loss: 1.2132
+INFO: testset accuracy: 0.4918
+INFO: intersection over union: 0.1962
+INFO: train Loss for epoch 10: 1.0237
+INFO: train Loss for epoch 9: 0.9901
+INFO: every class accuracy{'Normal': 0.1639, 'Maculopathy': 0.6393, 'DR': 0.2951, 'RD': 0.7869, 'MH': 0.9344, 'PH': 0.2459}
+INFO: test_mean_loss: 1.9968
+INFO: testset accuracy: 0.5109
+INFO: intersection over union: 0.2104
+INFO: every class accuracy{'Normal': 0.377, 'Maculopathy': 0.5902, 'DR': 0.5738, 'RD': 0.6066, 'MH': 0.5246, 'PH': 0.6721}
+INFO: test_mean_loss: 1.4467
+INFO: testset accuracy: 0.5574
+INFO: intersection over union: 0.2262
+INFO: train Loss for epoch 11: 1.0133
+INFO: train Loss for epoch 10: 0.9730
+INFO: every class accuracy{'Normal': 0.8361, 'Maculopathy': 0.3607, 'DR': 0.7049, 'RD': 0.2131, 'MH': 0.082, 'PH': 0.7541}
+INFO: test_mean_loss: 1.1890
+INFO: testset accuracy: 0.4918
+INFO: intersection over union: 0.1913
+INFO: every class accuracy{'Normal': 0.5902, 'Maculopathy': 0.3934, 'DR': 0.7377, 'RD': 0.4918, 'MH': 0.3443, 'PH': 0.4754}
+INFO: test_mean_loss: 2.2077
+INFO: testset accuracy: 0.5055
+INFO: intersection over union: 0.2210
+INFO: train Loss for epoch 12: 1.0093
+INFO: train Loss for epoch 11: 0.9659
+INFO: every class accuracy{'Normal': 0.7541, 'Maculopathy': 0.5902, 'DR': 0.6557, 'RD': 0.5082, 'MH': 0.3115, 'PH': 0.6721}
+INFO: test_mean_loss: 0.9898
+INFO: testset accuracy: 0.5820
+INFO: intersection over union: 0.2869
+INFO: at epoch 12, BESTMODEL.pth saved!
+INFO: every class accuracy{'Normal': 0.459, 'Maculopathy': 0.6066, 'DR': 0.5574, 'RD': 0.5246, 'MH': 0.6066, 'PH': 0.623}
+INFO: test_mean_loss: 1.4301
+INFO: testset accuracy: 0.5628
+INFO: intersection over union: 0.2309
+INFO: train Loss for epoch 13: 0.9952
+INFO: train Loss for epoch 12: 0.9627
+INFO: every class accuracy{'Normal': 0.8033, 'Maculopathy': 0.3279, 'DR': 0.7213, 'RD': 0.2787, 'MH': 0.1311, 'PH': 0.2131}
+INFO: test_mean_loss: 1.2986
+INFO: testset accuracy: 0.4126
+INFO: intersection over union: 0.1981
+INFO: every class accuracy{'Normal': 0.4098, 'Maculopathy': 0.623, 'DR': 0.5738, 'RD': 0.6066, 'MH': 0.2295, 'PH': 0.6066}
+INFO: test_mean_loss: 1.4432
+INFO: testset accuracy: 0.5082
+INFO: intersection over union: 0.2186
+INFO: train Loss for epoch 14: 1.0130
+INFO: train Loss for epoch 13: 0.9510
+INFO: every class accuracy{'Normal': 0.2295, 'Maculopathy': 0.6393, 'DR': 0.3279, 'RD': 0.7213, 'MH': 0.8689, 'PH': 0.7377}
+INFO: test_mean_loss: 2.0543
+INFO: testset accuracy: 0.5874
+INFO: intersection over union: 0.2005
+INFO: every class accuracy{'Normal': 0.6721, 'Maculopathy': 0.4098, 'DR': 0.7213, 'RD': 0.459, 'MH': 0.7213, 'PH': 0.4262}
+INFO: test_mean_loss: 2.6654
+INFO: testset accuracy: 0.5683
+INFO: intersection over union: 0.2634
+INFO: train Loss for epoch 15: 0.9905
+INFO: train Loss for epoch 14: 0.9356
+INFO: every class accuracy{'Normal': 0.4262, 'Maculopathy': 0.5082, 'DR': 0.3607, 'RD': 0.6885, 'MH': 0.6885, 'PH': 0.3115}
+INFO: test_mean_loss: 1.2966
+INFO: testset accuracy: 0.4973
+INFO: intersection over union: 0.2033
+INFO: every class accuracy{'Normal': 0.3934, 'Maculopathy': 0.5902, 'DR': 0.5246, 'RD': 0.623, 'MH': 0.1639, 'PH': 0.6557}
+INFO: test_mean_loss: 1.3608
+INFO: testset accuracy: 0.4918
+INFO: intersection over union: 0.1880
+INFO: train Loss for epoch 16: 0.9800
+INFO: train Loss for epoch 15: 0.9301
+INFO: every class accuracy{'Normal': 0.2459, 'Maculopathy': 0.6393, 'DR': 0.2787, 'RD': 0.7213, 'MH': 0.8689, 'PH': 0.7541}
+INFO: test_mean_loss: 3.5692
+INFO: testset accuracy: 0.5847
+INFO: intersection over union: 0.1820
+INFO: every class accuracy{'Normal': 0.5246, 'Maculopathy': 0.5902, 'DR': 0.5738, 'RD': 0.6066, 'MH': 0.7213, 'PH': 0.6066}
+INFO: test_mean_loss: 1.6861
+INFO: testset accuracy: 0.6038
+INFO: intersection over union: 0.2555
+INFO: train Loss for epoch 17: 0.9676
+INFO: train Loss for epoch 16: 0.9231
+INFO: every class accuracy{'Normal': 0.1639, 'Maculopathy': 0.6393, 'DR': 0.2951, 'RD': 0.7869, 'MH': 0.9344, 'PH': 0.2459}
+INFO: test_mean_loss: 8.1199
+INFO: testset accuracy: 0.5109
+INFO: intersection over union: 0.2104
+INFO: every class accuracy{'Normal': 0.5574, 'Maculopathy': 0.6066, 'DR': 0.6393, 'RD': 0.5738, 'MH': 0.3443, 'PH': 0.5574}
+INFO: test_mean_loss: 1.8180
+INFO: testset accuracy: 0.5464
+INFO: intersection over union: 0.2410
+INFO: train Loss for epoch 18: 0.9642
+INFO: train Loss for epoch 17: 0.9206
+INFO: every class accuracy{'Normal': 0.2295, 'Maculopathy': 0.4754, 'DR': 0.2787, 'RD': 0.5902, 'MH': 0.7377, 'PH': 0.2787}
+INFO: test_mean_loss: 3.2976
+INFO: testset accuracy: 0.4317
+INFO: intersection over union: 0.1290
+INFO: every class accuracy{'Normal': 0.5246, 'Maculopathy': 0.5902, 'DR': 0.623, 'RD': 0.6066, 'MH': 0.4426, 'PH': 0.541}
+INFO: test_mean_loss: 1.8453
+INFO: testset accuracy: 0.5546
+INFO: intersection over union: 0.2418
+INFO: train Loss for epoch 19: 0.9567
+INFO: train Loss for epoch 18: 0.9048
+INFO: every class accuracy{'Normal': 0.2623, 'Maculopathy': 0.6066, 'DR': 0.2951, 'RD': 0.6885, 'MH': 0.8361, 'PH': 0.3115}
+INFO: test_mean_loss: 4.1541
+INFO: testset accuracy: 0.5000
+INFO: intersection over union: 0.1863
+INFO: every class accuracy{'Normal': 0.4426, 'Maculopathy': 0.5902, 'DR': 0.5082, 'RD': 0.623, 'MH': 0.6557, 'PH': 0.6393}
+INFO: test_mean_loss: 1.4227
+INFO: testset accuracy: 0.5765
+INFO: intersection over union: 0.2243
+INFO: train Loss for epoch 20: 0.9553
+INFO: train Loss for epoch 19: 0.8971
+INFO: every class accuracy{'Normal': 0.7869, 'Maculopathy': 0.3279, 'DR': 0.6721, 'RD': 0.2787, 'MH': 0.1311, 'PH': 0.6885}
+INFO: test_mean_loss: 1.5072
+INFO: testset accuracy: 0.4809
+INFO: intersection over union: 0.1803
+INFO: every class accuracy{'Normal': 0.4262, 'Maculopathy': 0.5902, 'DR': 0.5082, 'RD': 0.6557, 'MH': 0.6557, 'PH': 0.6393}
+INFO: test_mean_loss: 1.4530
+INFO: testset accuracy: 0.5792
+INFO: intersection over union: 0.2257
+INFO: train Loss for epoch 21: 0.9478
+INFO: train Loss for epoch 20: 0.8874
+INFO: every class accuracy{'Normal': 0.3279, 'Maculopathy': 0.3607, 'DR': 0.4098, 'RD': 0.4754, 'MH': 0.4918, 'PH': 0.4918}
+INFO: test_mean_loss: 2.7494
+INFO: testset accuracy: 0.4262
+INFO: intersection over union: 0.1235
+INFO: every class accuracy{'Normal': 0.541, 'Maculopathy': 0.5082, 'DR': 0.7213, 'RD': 0.5902, 'MH': 0.4754, 'PH': 0.459}
+INFO: test_mean_loss: 2.3817
+INFO: testset accuracy: 0.5492
+INFO: intersection over union: 0.2527
+INFO: train Loss for epoch 22: 0.9392
+INFO: train Loss for epoch 21: 0.8769
+INFO: every class accuracy{'Normal': 0.2295, 'Maculopathy': 0.6393, 'DR': 0.2623, 'RD': 0.7213, 'MH': 0.8689, 'PH': 0.2131}
+INFO: test_mean_loss: 9.7597
+INFO: testset accuracy: 0.4891
+INFO: intersection over union: 0.1891
+INFO: every class accuracy{'Normal': 0.4918, 'Maculopathy': 0.4918, 'DR': 0.6721, 'RD': 0.6393, 'MH': 0.541, 'PH': 0.4754}
+INFO: test_mean_loss: 2.1707
+INFO: testset accuracy: 0.5519
+INFO: intersection over union: 0.2391
+INFO: train Loss for epoch 23: 0.9338
+INFO: train Loss for epoch 22: 0.8681
+INFO: every class accuracy{'Normal': 0.2295, 'Maculopathy': 0.6393, 'DR': 0.2623, 'RD': 0.7213, 'MH': 0.8689, 'PH': 0.2131}
+INFO: test_mean_loss: 10.1649
+INFO: testset accuracy: 0.4891
+INFO: intersection over union: 0.1891
+INFO: every class accuracy{'Normal': 0.5082, 'Maculopathy': 0.4098, 'DR': 0.7541, 'RD': 0.5902, 'MH': 0.4262, 'PH': 0.3934}
+INFO: test_mean_loss: 3.7162
+INFO: testset accuracy: 0.5137
+INFO: intersection over union: 0.2227
+INFO: train Loss for epoch 24: 0.9172
+INFO: train Loss for epoch 23: 0.8565
+INFO: every class accuracy{'Normal': 0.1967, 'Maculopathy': 0.6721, 'DR': 0.2623, 'RD': 0.7541, 'MH': 0.9016, 'PH': 0.2459}
+INFO: test_mean_loss: 13.9911
+INFO: testset accuracy: 0.5055
+INFO: intersection over union: 0.2055
+INFO: every class accuracy{'Normal': 0.5902, 'Maculopathy': 0.3607, 'DR': 0.8033, 'RD': 0.4754, 'MH': 0.3443, 'PH': 0.3443}
+INFO: test_mean_loss: 5.2795
+INFO: testset accuracy: 0.4863
+INFO: intersection over union: 0.2306
+INFO: train Loss for epoch 25: 0.9118
+INFO: train Loss for epoch 24: 0.8527
+INFO: every class accuracy{'Normal': 0.2623, 'Maculopathy': 0.6066, 'DR': 0.2951, 'RD': 0.7049, 'MH': 0.8525, 'PH': 0.1803}
+INFO: test_mean_loss: 8.9130
+INFO: testset accuracy: 0.4836
+INFO: intersection over union: 0.1781
+INFO: every class accuracy{'Normal': 0.541, 'Maculopathy': 0.3607, 'DR': 0.7705, 'RD': 0.541, 'MH': 0.4098, 'PH': 0.377}
+INFO: test_mean_loss: 5.4638
+INFO: testset accuracy: 0.5000
+INFO: intersection over union: 0.2254
+INFO: train Loss for epoch 26: 0.8977
+INFO: train Loss for epoch 25: 0.8490
+INFO: every class accuracy{'Normal': 0.2295, 'Maculopathy': 0.541, 'DR': 0.3279, 'RD': 0.6557, 'MH': 0.8033, 'PH': 0.2131}
+INFO: test_mean_loss: 8.7907
+INFO: testset accuracy: 0.4617
+INFO: intersection over union: 0.1645
+INFO: every class accuracy{'Normal': 0.459, 'Maculopathy': 0.4426, 'DR': 0.6885, 'RD': 0.623, 'MH': 0.5082, 'PH': 0.459}
+INFO: test_mean_loss: 2.8509
+INFO: testset accuracy: 0.5301
+INFO: intersection over union: 0.2145
+INFO: train Loss for epoch 27: 0.8976
+INFO: train Loss for epoch 26: 0.8429
+INFO: every class accuracy{'Normal': 0.2623, 'Maculopathy': 0.623, 'DR': 0.2951, 'RD': 0.6885, 'MH': 0.8361, 'PH': 0.1803}
+INFO: test_mean_loss: 11.5569
+INFO: testset accuracy: 0.4809
+INFO: intersection over union: 0.1781
+INFO: every class accuracy{'Normal': 0.3934, 'Maculopathy': 0.459, 'DR': 0.6557, 'RD': 0.5902, 'MH': 0.4754, 'PH': 0.4426}
+INFO: test_mean_loss: 4.0145
+INFO: testset accuracy: 0.5027
+INFO: intersection over union: 0.1921
+INFO: train Loss for epoch 28: 0.8905
+INFO: train Loss for epoch 27: 0.8387
+INFO: every class accuracy{'Normal': 0.1967, 'Maculopathy': 0.5574, 'DR': 0.3443, 'RD': 0.5082, 'MH': 0.6393, 'PH': 0.3934}
+INFO: test_mean_loss: 6.4436
+INFO: testset accuracy: 0.4399
+INFO: intersection over union: 0.1434
+INFO: every class accuracy{'Normal': 0.4754, 'Maculopathy': 0.3607, 'DR': 0.7377, 'RD': 0.5738, 'MH': 0.459, 'PH': 0.377}
+INFO: test_mean_loss: 4.7496
+INFO: testset accuracy: 0.4973
+INFO: intersection over union: 0.2063
+INFO: train Loss for epoch 29: 0.8749
+INFO: train Loss for epoch 28: 0.8355
+INFO: every class accuracy{'Normal': 0.2295, 'Maculopathy': 0.377, 'DR': 0.3279, 'RD': 0.5574, 'MH': 0.6885, 'PH': 0.3279}
+INFO: test_mean_loss: 8.7530
+INFO: testset accuracy: 0.4180
+INFO: intersection over union: 0.1844
+INFO: every class accuracy{'Normal': 0.541, 'Maculopathy': 0.3607, 'DR': 0.8033, 'RD': 0.541, 'MH': 0.3934, 'PH': 0.3443}
+INFO: test_mean_loss: 6.5811
+INFO: testset accuracy: 0.4973
+INFO: intersection over union: 0.2328
+INFO: train Loss for epoch 30: 0.8782
+INFO: train Loss for epoch 29: 0.8341
+INFO: every class accuracy{'Normal': 0.1639, 'Maculopathy': 0.3607, 'DR': 0.2951, 'RD': 0.7869, 'MH': 0.9344, 'PH': 0.2459}
+INFO: test_mean_loss: 12.9219
+INFO: testset accuracy: 0.4645
+INFO: intersection over union: 0.2664
+INFO: every class accuracy{'Normal': 0.459, 'Maculopathy': 0.3934, 'DR': 0.7049, 'RD': 0.6393, 'MH': 0.459, 'PH': 0.4098}
+INFO: test_mean_loss: 3.7123
+INFO: testset accuracy: 0.5109
+INFO: intersection over union: 0.2063
+INFO: train Loss for epoch 31: 0.8698
+INFO: train Loss for epoch 30: 0.8313
+INFO: every class accuracy{'Normal': 0.2295, 'Maculopathy': 0.3934, 'DR': 0.3279, 'RD': 0.6885, 'MH': 0.8197, 'PH': 0.2131}
+INFO: test_mean_loss: 11.7455
+INFO: testset accuracy: 0.4454
+INFO: intersection over union: 0.2172
+INFO: every class accuracy{'Normal': 0.541, 'Maculopathy': 0.377, 'DR': 0.7705, 'RD': 0.5574, 'MH': 0.3934, 'PH': 0.3607}
+INFO: test_mean_loss: 4.5259
+INFO: testset accuracy: 0.5000
+INFO: intersection over union: 0.2342
+INFO: train Loss for epoch 32: 0.8687
+INFO: train Loss for epoch 31: 0.8279
+INFO: every class accuracy{'Normal': 0.2623, 'Maculopathy': 0.3607, 'DR': 0.2787, 'RD': 0.7213, 'MH': 0.8689, 'PH': 0.1967}
+INFO: test_mean_loss: 16.4444
+INFO: testset accuracy: 0.4481
+INFO: intersection over union: 0.2309
+INFO: every class accuracy{'Normal': 0.5082, 'Maculopathy': 0.3934, 'DR': 0.7213, 'RD': 0.5902, 'MH': 0.4098, 'PH': 0.3443}
+INFO: test_mean_loss: 3.9642
+INFO: testset accuracy: 0.4945
+INFO: intersection over union: 0.2104
+INFO: train Loss for epoch 33: 0.8601
+INFO: train Loss for epoch 32: 0.8266
+INFO: every class accuracy{'Normal': 0.1967, 'Maculopathy': 0.3443, 'DR': 0.2787, 'RD': 0.7049, 'MH': 0.8525, 'PH': 0.2295}
+INFO: test_mean_loss: 12.1665
+INFO: testset accuracy: 0.4344
+INFO: intersection over union: 0.2254
+INFO: every class accuracy{'Normal': 0.5246, 'Maculopathy': 0.3934, 'DR': 0.7377, 'RD': 0.6393, 'MH': 0.4098, 'PH': 0.3607}
+INFO: test_mean_loss: 4.7757
+INFO: testset accuracy: 0.5109
+INFO: intersection over union: 0.2227
+INFO: train Loss for epoch 34: 0.8538
+INFO: train Loss for epoch 33: 0.8252
+INFO: every class accuracy{'Normal': 0.2459, 'Maculopathy': 0.4426, 'DR': 0.3115, 'RD': 0.623, 'MH': 0.7705, 'PH': 0.2459}
+INFO: test_mean_loss: 10.9055
+INFO: testset accuracy: 0.4399
+INFO: intersection over union: 0.2049
+INFO: every class accuracy{'Normal': 0.541, 'Maculopathy': 0.3443, 'DR': 0.7869, 'RD': 0.5574, 'MH': 0.4098, 'PH': 0.377}
+INFO: test_mean_loss: 6.4282
+INFO: testset accuracy: 0.5027
+INFO: intersection over union: 0.2309
+INFO: train Loss for epoch 35: 0.8497
+INFO: train Loss for epoch 34: 0.8242
+INFO: every class accuracy{'Normal': 0.1639, 'Maculopathy': 0.3607, 'DR': 0.2951, 'RD': 0.7869, 'MH': 0.9344, 'PH': 0.2459}
+INFO: test_mean_loss: 28.9327
+INFO: testset accuracy: 0.4645
+INFO: intersection over union: 0.2664
+INFO: every class accuracy{'Normal': 0.5082, 'Maculopathy': 0.459, 'DR': 0.6721, 'RD': 0.6557, 'MH': 0.5246, 'PH': 0.4754}
+INFO: test_mean_loss: 3.1800
+INFO: testset accuracy: 0.5492
+INFO: intersection over union: 0.2404
+INFO: train Loss for epoch 36: 0.8494
+INFO: train Loss for epoch 35: 0.8226
+INFO: every class accuracy{'Normal': 0.2623, 'Maculopathy': 0.3607, 'DR': 0.2787, 'RD': 0.7213, 'MH': 0.8689, 'PH': 0.2131}
+INFO: test_mean_loss: 18.3237
+INFO: testset accuracy: 0.4508
+INFO: intersection over union: 0.2391
+INFO: every class accuracy{'Normal': 0.5738, 'Maculopathy': 0.3443, 'DR': 0.8197, 'RD': 0.5082, 'MH': 0.3607, 'PH': 0.3607}
+INFO: test_mean_loss: 6.1754
+INFO: testset accuracy: 0.4945
+INFO: intersection over union: 0.2355
+INFO: train Loss for epoch 37: 0.8434
+INFO: train Loss for epoch 36: 0.8218
+INFO: every class accuracy{'Normal': 0.2131, 'Maculopathy': 0.4262, 'DR': 0.3279, 'RD': 0.6557, 'MH': 0.8033, 'PH': 0.2131}
+INFO: test_mean_loss: 11.3665
+INFO: testset accuracy: 0.4399
+INFO: intersection over union: 0.2131
+INFO: every class accuracy{'Normal': 0.4426, 'Maculopathy': 0.4098, 'DR': 0.7049, 'RD': 0.623, 'MH': 0.459, 'PH': 0.4098}
+INFO: test_mean_loss: 4.5052
+INFO: testset accuracy: 0.5082
+INFO: intersection over union: 0.2071
+INFO: train Loss for epoch 38: 0.8413
+INFO: train Loss for epoch 37: 0.8214
+INFO: every class accuracy{'Normal': 0.2623, 'Maculopathy': 0.3934, 'DR': 0.2951, 'RD': 0.6885, 'MH': 0.8361, 'PH': 0.1803}
+INFO: test_mean_loss: 12.6088
+INFO: testset accuracy: 0.4426
+INFO: intersection over union: 0.2254
+INFO: every class accuracy{'Normal': 0.5082, 'Maculopathy': 0.4098, 'DR': 0.6885, 'RD': 0.6066, 'MH': 0.459, 'PH': 0.4262}
+INFO: test_mean_loss: 4.4840
+INFO: testset accuracy: 0.5164
+INFO: intersection over union: 0.1981
+INFO: train Loss for epoch 39: 0.8402
+INFO: train Loss for epoch 38: 0.8204
+INFO: every class accuracy{'Normal': 0.2295, 'Maculopathy': 0.4098, 'DR': 0.3443, 'RD': 0.6721, 'MH': 0.8033, 'PH': 0.2295}
+INFO: test_mean_loss: 13.0221
+INFO: testset accuracy: 0.4481
+INFO: intersection over union: 0.2145
+INFO: every class accuracy{'Normal': 0.5246, 'Maculopathy': 0.3934, 'DR': 0.7377, 'RD': 0.6066, 'MH': 0.4262, 'PH': 0.377}
+INFO: test_mean_loss: 4.8574
+INFO: testset accuracy: 0.5109
+INFO: intersection over union: 0.2104
+INFO: train Loss for epoch 40: 0.8393
+INFO: train Loss for epoch 39: 0.8194
+INFO: every class accuracy{'Normal': 0.2295, 'Maculopathy': 0.4426, 'DR': 0.3443, 'RD': 0.6557, 'MH': 0.8033, 'PH': 0.2295}
+INFO: test_mean_loss: 11.5276
+INFO: testset accuracy: 0.4508
+INFO: intersection over union: 0.2145
+INFO: every class accuracy{'Normal': 0.5574, 'Maculopathy': 0.3443, 'DR': 0.7869, 'RD': 0.5574, 'MH': 0.4098, 'PH': 0.3607}
+INFO: test_mean_loss: 5.2754
+INFO: testset accuracy: 0.5027
+INFO: intersection over union: 0.2295
+INFO: train Loss for epoch 41: 0.8364
+INFO: train Loss for epoch 40: 0.8191
+INFO: every class accuracy{'Normal': 0.2623, 'Maculopathy': 0.3934, 'DR': 0.2951, 'RD': 0.6885, 'MH': 0.8361, 'PH': 0.1803}
+INFO: test_mean_loss: 13.3157
+INFO: testset accuracy: 0.4426
+INFO: intersection over union: 0.2254
+INFO: every class accuracy{'Normal': 0.6066, 'Maculopathy': 0.3607, 'DR': 0.8033, 'RD': 0.4754, 'MH': 0.2951, 'PH': 0.3443}
+INFO: test_mean_loss: 7.6463
+INFO: testset accuracy: 0.4809
+INFO: intersection over union: 0.2224
+INFO: train Loss for epoch 42: 0.8358
+INFO: train Loss for epoch 41: 0.8188
+INFO: every class accuracy{'Normal': 0.2295, 'Maculopathy': 0.3607, 'DR': 0.2623, 'RD': 0.7213, 'MH': 0.8689, 'PH': 0.2131}
+INFO: test_mean_loss: 18.1589
+INFO: testset accuracy: 0.4426
+INFO: intersection over union: 0.2336
+INFO: every class accuracy{'Normal': 0.5246, 'Maculopathy': 0.3443, 'DR': 0.7213, 'RD': 0.6066, 'MH': 0.4098, 'PH': 0.377}
+INFO: test_mean_loss: 5.7068
+INFO: testset accuracy: 0.4973
+INFO: intersection over union: 0.2077
+INFO: train Loss for epoch 43: 0.8355
+INFO: train Loss for epoch 42: 0.8185
+INFO: every class accuracy{'Normal': 0.2295, 'Maculopathy': 0.5082, 'DR': 0.3279, 'RD': 0.541, 'MH': 0.6885, 'PH': 0.3443}
+INFO: test_mean_loss: 8.7420
+INFO: testset accuracy: 0.4399
+INFO: intersection over union: 0.1803
+INFO: every class accuracy{'Normal': 0.541, 'Maculopathy': 0.3443, 'DR': 0.7869, 'RD': 0.5574, 'MH': 0.3934, 'PH': 0.377}
+INFO: test_mean_loss: 5.2924
+INFO: testset accuracy: 0.5000
+INFO: intersection over union: 0.2309
+INFO: train Loss for epoch 44: 0.8350
+INFO: train Loss for epoch 43: 0.8180
+INFO: every class accuracy{'Normal': 0.1967, 'Maculopathy': 0.5902, 'DR': 0.3607, 'RD': 0.459, 'MH': 0.6066, 'PH': 0.4098}
+INFO: test_mean_loss: 8.3633
+INFO: testset accuracy: 0.4372
+INFO: intersection over union: 0.1639
+INFO: every class accuracy{'Normal': 0.5082, 'Maculopathy': 0.3934, 'DR': 0.7049, 'RD': 0.6393, 'MH': 0.4098, 'PH': 0.377}
+INFO: test_mean_loss: 4.8584
+INFO: testset accuracy: 0.5055
+INFO: intersection over union: 0.2145
+INFO: train Loss for epoch 45: 0.8334
+INFO: train Loss for epoch 44: 0.8178
+INFO: every class accuracy{'Normal': 0.2459, 'Maculopathy': 0.4426, 'DR': 0.3115, 'RD': 0.6393, 'MH': 0.7869, 'PH': 0.2623}
+INFO: test_mean_loss: 12.5054
+INFO: testset accuracy: 0.4481
+INFO: intersection over union: 0.2172
+INFO: every class accuracy{'Normal': 0.5738, 'Maculopathy': 0.3443, 'DR': 0.7869, 'RD': 0.5082, 'MH': 0.3607, 'PH': 0.3443}
+INFO: test_mean_loss: 6.4345
+INFO: testset accuracy: 0.4863
+INFO: intersection over union: 0.2273
+INFO: train Loss for epoch 46: 0.8329
+INFO: train Loss for epoch 45: 0.8176
+INFO: every class accuracy{'Normal': 0.2623, 'Maculopathy': 0.3934, 'DR': 0.2951, 'RD': 0.6885, 'MH': 0.8361, 'PH': 0.1803}
+INFO: test_mean_loss: 13.0492
+INFO: testset accuracy: 0.4426
+INFO: intersection over union: 0.2254
+INFO: every class accuracy{'Normal': 0.5082, 'Maculopathy': 0.4754, 'DR': 0.6885, 'RD': 0.6393, 'MH': 0.5082, 'PH': 0.459}
+INFO: test_mean_loss: 3.1356
+INFO: testset accuracy: 0.5464
+INFO: intersection over union: 0.2281
+INFO: train Loss for epoch 47: 0.8328
+INFO: train Loss for epoch 46: 0.8175
+INFO: every class accuracy{'Normal': 0.2623, 'Maculopathy': 0.4426, 'DR': 0.2951, 'RD': 0.623, 'MH': 0.7377, 'PH': 0.2787}
+INFO: test_mean_loss: 11.1025
+INFO: testset accuracy: 0.4399
+INFO: intersection over union: 0.1981
+INFO: every class accuracy{'Normal': 0.5738, 'Maculopathy': 0.377, 'DR': 0.8033, 'RD': 0.5082, 'MH': 0.3607, 'PH': 0.3443}
+INFO: test_mean_loss: 7.3047
+INFO: testset accuracy: 0.4945
+INFO: intersection over union: 0.2383
+INFO: train Loss for epoch 48: 0.8324
+INFO: train Loss for epoch 47: 0.8173
+INFO: every class accuracy{'Normal': 0.2459, 'Maculopathy': 0.4262, 'DR': 0.3279, 'RD': 0.6721, 'MH': 0.7869, 'PH': 0.2623}
+INFO: test_mean_loss: 13.1423
+INFO: testset accuracy: 0.4536
+INFO: intersection over union: 0.2186
+INFO: every class accuracy{'Normal': 0.5246, 'Maculopathy': 0.4754, 'DR': 0.6393, 'RD': 0.6393, 'MH': 0.5246, 'PH': 0.4918}
+INFO: test_mean_loss: 3.5772
+INFO: testset accuracy: 0.5492
+INFO: intersection over union: 0.2391
+INFO: train Loss for epoch 49: 0.8316
+INFO: train Loss for epoch 48: 0.8171
+INFO: every class accuracy{'Normal': 0.2131, 'Maculopathy': 0.4098, 'DR': 0.3115, 'RD': 0.6557, 'MH': 0.8033, 'PH': 0.2623}
+INFO: test_mean_loss: 13.1997
+INFO: testset accuracy: 0.4426
+INFO: intersection over union: 0.2131
+INFO: every class accuracy{'Normal': 0.5738, 'Maculopathy': 0.3607, 'DR': 0.8033, 'RD': 0.5082, 'MH': 0.3607, 'PH': 0.3443}
+INFO: test_mean_loss: 7.6348
+INFO: testset accuracy: 0.4918
+INFO: intersection over union: 0.2287
+INFO: train Loss for epoch 50: 0.8316
+INFO: train Loss for epoch 49: 0.8170
+INFO: every class accuracy{'Normal': 0.1803, 'Maculopathy': 0.5738, 'DR': 0.3443, 'RD': 0.4754, 'MH': 0.623, 'PH': 0.4262}
+INFO: test_mean_loss: 8.8048
+INFO: testset accuracy: 0.4372
+INFO: intersection over union: 0.1680
+INFO: every class accuracy{'Normal': 0.459, 'Maculopathy': 0.5082, 'DR': 0.6557, 'RD': 0.6393, 'MH': 0.541, 'PH': 0.4918}
+INFO: test_mean_loss: 3.2151
+INFO: testset accuracy: 0.5492
+INFO: intersection over union: 0.2194
+INFO: train Loss for epoch 50: 0.8169
+INFO: every class accuracy{'Normal': 0.541, 'Maculopathy': 0.3607, 'DR': 0.7705, 'RD': 0.5574, 'MH': 0.3934, 'PH': 0.3443}
+INFO: test_mean_loss: 4.8583
+INFO: testset accuracy: 0.4945
+INFO: intersection over union: 0.2104

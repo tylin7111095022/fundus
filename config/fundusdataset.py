@@ -1,5 +1,5 @@
 import os
-from torch.utils.data import Dataset,Subset, DataLoader
+from torch.utils.data import Dataset,Subset
 import cv2
 import torch
 from random import random
@@ -66,15 +66,17 @@ def split_dataset(dataset:Dataset,test_ratio:float= 0.2,seed:int=20230813):
     return trainset, testset
 
 if __name__ == '__main__':
-    labels, _ = get_image_multilabel("fundus_dataset_multilabel_0812")
+    labels, _ = get_image_multilabel("../fundus_dataset_multilabel")
 
-    # print(len(labels["img_label"]))
-    # print(len(labels["img_path"]))
+    print(len(labels["img_label"]))
+    print(len(labels["img_path"]))
     with open("label.json", "w") as outfile:
         json.dump(labels, outfile, indent = 4)
-    pipe = transforms.Compose([transforms.Resize((2048,2048))])
 
-    dataset = Fundusdataset("fundus_dataset_multilabel_0812",transforms=pipe)
-    trainset, testset = split_dataset(dataset,test_ratio=0.2)
-    print(dataset.class2ndx)
+    # fundus_dataset = Fundusdataset("fundus_dataset_multilabel",transforms=None, imgsize=512)
+    # trainset, testset = split_dataset(fundus_dataset,test_ratio=0.2,seed=20230823)
+    
+    # for i in range(len(trainset)):
+    #     print(trainset[0][0].shape)
+    # print(fundus_dataset.class2ndx)
     
