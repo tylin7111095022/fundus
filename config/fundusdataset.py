@@ -66,7 +66,7 @@ def split_dataset(dataset:Dataset,test_ratio:float= 0.2,seed:int=20230813):
     return trainset, testset
 
 if __name__ == '__main__':
-    labels, _ = get_image_multilabel("../fundus_dataset_multilabel")
+    labels, _ = get_image_multilabel("../multiLabel_base")
 
     print(len(labels["img_label"]))
     print(len(labels["img_path"]))

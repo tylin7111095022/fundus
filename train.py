@@ -7,11 +7,10 @@ from torchvision import transforms
 from tqdm import tqdm
 import logging
 import matplotlib.pyplot as plt
-from torch.nn import BCEWithLogitsLoss
-import yaml
+from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss
 #custom
 from config.fundusdataset import Fundusdataset, split_dataset
-from config.models import SPNet, ResGCNet, AsymmetricLossOptimized, initialize_model, get_optim
+from config.models import AsymmetricLossOptimized, initialize_model, get_optim
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -23,9 +22,9 @@ def get_args():
     parser.add_argument("--nclass", type=int, default=6,help="the number of class for classification task")
     parser.add_argument("--num_workers", type=int, default=8, help="num_workers > 0 turns on multi-process data loading")
     parser.add_argument("--epoches", type=int, default=50, help="Number of training epochs")
-    parser.add_argument("--batch_size", type=int, default=25, help="Batch size during training")
-    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for optimizer")
-    parser.add_argument("--threshold", type=float, default=0.5, dest="thresh",help="the threshold of that predicting if belong the class")
+    parser.add_argument("--batch_size", type=int, default=70, help="Batch size during training")
+    parser.add_argument("--lr", type=float, default=1e-2, help="Learning rate for optimizer")
+    parser.add_argument("--threshold", type=float, default=0.7, dest="thresh",help="the threshold of that predicting if belong the class")
     parser.add_argument("--weight_path", type=str,dest='wpath', default='./best.pth', help="path of model we trained best")
     parser.add_argument("--is_parallel", type=bool, default=False, dest="paral",help="parallel calculation at multiple gpus")
     parser.add_argument("--device", type=str, default='cuda:2', help='device trainging deep learning')
@@ -33,6 +32,8 @@ def get_args():
     return parser.parse_args()
 
 def main():
+    DSNAME = "multiLabel_base" #root of dataset
+    
     #設置Logging架構
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
@@ -52,10 +53,12 @@ def main():
     
     hparam = get_args()
     # TRANSPIPE = transforms.Compose([transforms.Resize((hparam.img_size,hparam.img_size))])
+    # logging.info("training the multiclass model with Cross Entropy Loss")
+    logging.info(f"Dataset: {DSNAME}")
 
     #資料隨機分選訓練、測試集
-    fundus_dataset = Fundusdataset("dataset_multilabel_DR1addNormal",transforms=None, imgsize=hparam.img_size)
-    trainset, testset = split_dataset(fundus_dataset,test_ratio=0.2,seed=20230823)
+    fundus_dataset = Fundusdataset(DSNAME,transforms=None, imgsize=hparam.img_size)
+    trainset, testset = split_dataset(fundus_dataset,test_ratio=0.3,seed=20230830)
     logging.info(fundus_dataset.class2ndx)
     # 計算每個標籤的正負樣本比
     if hparam.wl:
@@ -86,11 +89,26 @@ def main():
                                                               min_lr=1e-6,
                                                               verbose =True)
     device = torch.device( hparam.device if torch.cuda.is_available() else 'cpu')
-    criteria = BCEWithLogitsLoss(pos_weight=pos_weights)
-    # criteria = AsymmetricLossOptimized()
+    # criteria = BCEWithLogitsLoss(pos_weight=pos_weights)
+    criteria = AsymmetricLossOptimized(gamma_neg=3, gamma_pos=0, clip=0.1, eps=1e-8, disable_torch_grad_focal_loss=False)
 
     #training
-    history = training(model,trainset, testset, criteria, optimizer,lr_scheduler, device, hparam)
+    # history = train_teacher(model,
+    #                         trainset=trainset,
+    #                         testset=testset,
+    #                         loss_fn=CrossEntropyLoss(),
+    #                         optimizer=optimizer,
+    #                         lr_scheduler=lr_scheduler,
+    #                         device=device,
+    #                         hparam=hparam)
+    history = training(model=model,
+                       trainset=trainset,
+                       testset=testset,
+                       loss_fn=criteria,
+                       optimizer=optimizer,
+                       lr_scheduler=lr_scheduler,
+                       device=device,
+                       hparam=hparam)
     #plotting
     plot_history(history['train_history'],history['validationn_history'],saved=True)
 
@@ -104,30 +122,27 @@ def main():
     ax[1].set_ylim(0.0, 1.0)
     ax[1].set_title(f"inter_over_union")
     plt.tight_layout()
-    fig.savefig("accuracy")
+    fig.savefig("accuracy.jpg")
 
-    # evaluate performance of testset
-    # best_model = get_model(model_name=hparam.mname,in_ch=hparam.inch,num_class=hparam.nclass)
-    # best_model.load_state_dict(torch.load(hparam.wpath))
     return
 
 def evaluate(model,dataset, loss_fn,device,hparam):
     model.eval()
-    model = model.to(device)
+    model = model.cpu()
     total_loss = 0
     total_iou = []
     dataloader = DataLoader(dataset=dataset,batch_size=hparam.batch_size,shuffle=False)
     for img_data,labels in dataloader:
-        img_data = img_data.to(device)
-        labels = labels.to(device).squeeze() #變為一軸
+        img_data = img_data.cpu()
+        labels = labels.cpu().squeeze() #變為一軸
         logits = model(img_data).squeeze()
         loss = loss_fn(logits,labels)
         total_loss += loss.item()
-        predict = torch.sigmoid(logits.detach()).squeeze()
-        mask = (predict > hparam.thresh).to(torch.int64) # mask 中值為True即為預測值
+        prob = torch.sigmoid(logits.detach()).squeeze()
+        mask = (prob > hparam.thresh).to(torch.int64) # mask 中值為True即為預測值
         labels = labels.to(torch.int64)
         batch_iou = (torch.sum(mask & labels).item()) / (torch.sum(mask | labels).item())
-        print(f"after sigmoid: \n{predict}")
+        print(f"after sigmoid: \n{prob}")
         # print(f"predicts: \n{mask}")
         # print(f"label: \n{labels}")
         # print(f"predicts & labels: \n{mask & labels}")
@@ -142,7 +157,6 @@ def evaluate(model,dataset, loss_fn,device,hparam):
     return mean_loss, iou
 
 def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, hparam):
-    model = model.to(device)
     dataloader = DataLoader(trainset,batch_size=hparam.batch_size,shuffle=True,)
 
     logging.info(f'''Starting training:
@@ -164,6 +178,7 @@ def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, 
     inter_union_history = []
 
     for epoch in range(1,hparam.epoches+1):
+        model = model.to(device)
         model.train()
         epoch_loss = 0
         for img_data, labels in tqdm(dataloader):
@@ -180,8 +195,10 @@ def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, 
         train_history.append(epoch_loss/((len(trainset)//hparam.batch_size)+1))
 
         test_mean_loss, intersect_union = evaluate(model=model,dataset=testset,loss_fn=loss_fn,device=device,hparam=hparam)
-        every_class_acc, overallacc = acc_every_class(dataset=testset,model=model,thresh=hparam.thresh,device=hparam.device)
-        logging.info(f"every class accuracy{every_class_acc}")
+        every_class_acc, overallacc = get_acc(dataset=testset,model=model,thresh=hparam.thresh,device=hparam.device)
+        every_class_recall, overallrecall = get_recall(dataset=testset,model=model,thresh=hparam.thresh,device=hparam.device)
+        logging.info(f"every class accuracy:{every_class_acc}")
+        logging.info(f"every class recall:{every_class_recall}")
         lr_scheduler.step(test_mean_loss) # lr_scheduler 參照 test_mean_loss
 
         validationn_history.append(test_mean_loss)
@@ -190,6 +207,7 @@ def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, 
         
         logging.info(f'test_mean_loss: {test_mean_loss:.4f}')
         logging.info(f'testset accuracy: {overallacc:.4f}')
+        logging.info(f'testset recall: {overallrecall:.4f}')
         logging.info(f'intersection over union: {intersect_union:.4f}')
         
         #儲存最佳的模型
@@ -224,17 +242,9 @@ def plot_history(trainingloss:list,validationloss:list, saved:bool=False,figname
 
     return
 
-def get_model(model_name:str, in_ch=2,filters=32,num_class=5,img_shape:tuple=(2048,2048)):
-    '''model_name 必須是 spnet 或 resgcnet'''
-    if model_name == 'spnet':
-        return SPNet(in_ch=in_ch, num_class=num_class,img_shape=img_shape,filters=filters)
-    elif model_name == 'resgcnet':
-        return ResGCNet(in_ch=in_ch, num_class=num_class,img_shape=img_shape,filters=filters)
-    else:
-        print(f'Don\'t find the model: {model_name} .')
-
-def acc_every_class(dataset:[str | Fundusdataset],model, device, thresh:float=0.5, transforms=None,)->dict:
-    model = model.to(device) 
+def get_acc(dataset:[str | Fundusdataset],model, device, thresh:float=0.5, transforms=None,)->dict:
+    model = model.cpu()
+    model = model.eval()
     if isinstance (dataset,str):
         ds = Fundusdataset(dataset,transforms=transforms)
     else:
@@ -245,11 +255,11 @@ def acc_every_class(dataset:[str | Fundusdataset],model, device, thresh:float=0.
     count_t = torch.zeros(len(class2ndx),dtype=torch.int64)
     for i in range(len(ds)):
         img = ds[i][0].unsqueeze(0) #加入批次軸為了預測
-        img = img.to(device=device)
+        img = img.cpu()
         prob = torch.sigmoid(model(img)).squeeze() #去掉batch軸
         predict = (prob > thresh).to(torch.int64)
         label = ds[i][1]
-        label = label.to(device=device)
+        label = label.cpu()
         for j in range(len(label)):
             if predict[j] == label[j]:
                 count_t[j] += 1
@@ -260,6 +270,122 @@ def acc_every_class(dataset:[str | Fundusdataset],model, device, thresh:float=0.
         acc_dict[ndx2class[i]] = round(count_t[i].item(),4)
 
     return acc_dict, overall_acc
+
+def get_recall(dataset:[str | Fundusdataset],model, device, thresh:float=0.5, transforms=None,)->dict:
+    model = model.cpu()
+    model = model.eval()
+    if isinstance (dataset,str):
+        ds = Fundusdataset(dataset,transforms=transforms)
+    else:
+        ds = dataset
+    class2ndx = ds.dataset.class2ndx
+    ndx2class = {v:k for k,v in class2ndx.items()}
+    recall_dict = {}
+    count_t = torch.zeros(len(class2ndx),dtype=torch.int64)
+    denominator = torch.zeros(len(class2ndx),dtype=torch.int64)
+    for i in range(len(ds)):
+        img = ds[i][0].unsqueeze(0) #加入批次軸為了預測
+        img = img.cpu()
+        prob = torch.sigmoid(model(img)).squeeze() #去掉batch軸
+        predict = (prob > thresh).to(torch.int64)
+        label = ds[i][1]
+        label = label.cpu()
+        for j in range(len(label)):
+            if (label[j] == 1) and (predict[j] == label[j]):
+                count_t[j] += 1
+            if(label[j] == 1):
+                denominator[j] += 1
+
+    recall = count_t.to(torch.float32) / denominator.to(torch.float32)
+    overall_recall = (torch.sum(recall) / len(recall)).item()
+    for i in range(len(count_t)):
+        recall_dict[ndx2class[i]] = round(recall[i].item(),4)
+
+    return recall_dict, overall_recall
+
+def train_teacher(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, hparam):
+    model = model.to(device)
+    trainloader = DataLoader(trainset,batch_size=hparam.batch_size,shuffle=True,)
+
+    logging.info(f'''Starting training teacher model:
+        Model:          {hparam.mname}
+        Optimizer:      {hparam.optim}
+        Epochs:         {hparam.epoches}
+        Batch size:     {hparam.batch_size}
+        Training size:  {len(trainset)}
+        Testing size:   {len(testset)}
+        Image size:     {hparam.img_size}
+        Device:         {device.type}
+        Initial learning rate:  {hparam.lr}
+    ''')
+
+    train_history = []
+    validationn_history = []
+    acc_history = []
+
+    for epoch in range(1,hparam.epoches+1):
+        model.train()
+        epoch_loss = 0
+        for img_data, labels in tqdm(trainloader):
+            img_data = img_data.to(device)
+            labels = labels.to(device).squeeze()
+            logits = model(img_data).squeeze()
+            loss = loss_fn(logits,labels)
+            epoch_loss += loss.item()
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        logging.info(f'train Loss for epoch {epoch}: {epoch_loss/((len(trainset)//hparam.batch_size)+1):.4f}')
+        train_history.append(epoch_loss/((len(trainset)//hparam.batch_size)+1))
+
+        acc_list = []
+        model.eval()
+        model = model.to(device)
+        total_loss = 0
+
+        testloader = DataLoader(dataset=testset,batch_size=hparam.batch_size,shuffle=False)
+        for img_data,labels in testloader:
+            img_data = img_data.to(device)
+            labels = labels.to(device).squeeze() #變為一軸
+            logits = model(img_data).squeeze()
+            loss = loss_fn(logits,labels)
+            total_loss += loss.item()
+            probs = torch.softmax(logits.detach(),dim=1)
+            predits = torch.argmax(probs, dim=1)
+            labels = torch.argmax(labels, dim=1)
+            print(f"probs: {probs}")
+            acc = ((predits == labels).sum() / len(predits)).item()
+            acc_list.append(acc)
+           
+        test_mean_loss = total_loss/ ((len(testset)//hparam.batch_size)+1)
+        
+        lr_scheduler.step(test_mean_loss) # lr_scheduler 參照 test_mean_loss
+
+        validationn_history.append(test_mean_loss)
+        overallacc = sum(acc_list) / len(acc_list)
+        acc_history.append(overallacc)
+
+        
+        logging.info(f'test_mean_loss: {test_mean_loss:.4f}')
+        logging.info(f'acc: {overallacc:.4f}')
+        
+        
+        #儲存最佳的模型
+        if epoch == 1:
+            criterion = test_mean_loss
+            torch.save(model.state_dict(), "teacher_best.pth")
+            logging.info(f'at epoch {epoch}, BESTMODEL.pth saved!')
+        elif(test_mean_loss < criterion):
+            criterion = test_mean_loss
+            torch.save(model.state_dict(),"teacher_best.pth")
+            logging.info(f'at epoch {epoch}, BESTMODEL.pth saved!')
+            
+        torch.save(model.state_dict(),"./last.pth")
+
+    return dict(train_history=train_history,
+                validationn_history=validationn_history,
+                acc_history=acc_history)
     
 
 if __name__ == '__main__':
