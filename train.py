@@ -15,6 +15,7 @@ from config.models import AsymmetricLossOptimized, initialize_model, get_optim
 def get_args():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument("--description","-desc", type=str, default="this train kick out the normal data and using BCE with pos weight", help='description of this training process.')
     parser.add_argument("--model_name", type=str, dest='mname', default='yolov8', help='deep learning model will be used')
     parser.add_argument("--optim", type=str, default='AdamW', help='optimizer')
     parser.add_argument("--in_channel", type=int, default=3, dest="inch",help="the number of input channel of model")
@@ -22,7 +23,7 @@ def get_args():
     parser.add_argument("--nclass", type=int, default=6,help="the number of class for classification task")
     parser.add_argument("--num_workers", type=int, default=8, help="num_workers > 0 turns on multi-process data loading")
     parser.add_argument("--epoches", type=int, default=50, help="Number of training epochs")
-    parser.add_argument("--batch_size", type=int, default=70, help="Batch size during training")
+    parser.add_argument("--batch_size", type=int, default=100, help="Batch size during training")
     parser.add_argument("--lr", type=float, default=1e-2, help="Learning rate for optimizer")
     parser.add_argument("--threshold", type=float, default=0.7, dest="thresh",help="the threshold of that predicting if belong the class")
     parser.add_argument("--weight_path", type=str,dest='wpath', default='./best.pth', help="path of model we trained best")
@@ -32,7 +33,7 @@ def get_args():
     return parser.parse_args()
 
 def main():
-    DSNAME = "multiLabel_base" #root of dataset
+    DSNAME = "./dataset/multi_labels_Final_0904_500_NoNormal" #root of dataset
     
     #設置Logging架構
     logger = logging.getLogger()
@@ -53,7 +54,8 @@ def main():
     
     hparam = get_args()
     # TRANSPIPE = transforms.Compose([transforms.Resize((hparam.img_size,hparam.img_size))])
-    # logging.info("training the multiclass model with Cross Entropy Loss")
+    
+    logging.info(f"{hparam.description}")
     logging.info(f"Dataset: {DSNAME}")
 
     #資料隨機分選訓練、測試集
@@ -73,8 +75,6 @@ def main():
         pos_weights = torch.ones(hparam.nclass).to(hparam.device)
     logging.info(f"pos_weights: {pos_weights}")
 
-        
-    # model = get_model(model_name=hparam.mname,in_ch=hparam.inch,img_shape=(hparam.img_size,hparam.img_size),num_class=hparam.nclass)
     model = initialize_model(hparam.mname,num_classes=hparam.nclass,use_pretrained=True)
     if torch.cuda.device_count() > 1 and hparam.paral:
           logging.info(f"use {torch.cuda.device_count()} GPUs!")
@@ -89,8 +89,8 @@ def main():
                                                               min_lr=1e-6,
                                                               verbose =True)
     device = torch.device( hparam.device if torch.cuda.is_available() else 'cpu')
-    # criteria = BCEWithLogitsLoss(pos_weight=pos_weights)
-    criteria = AsymmetricLossOptimized(gamma_neg=3, gamma_pos=0, clip=0.1, eps=1e-8, disable_torch_grad_focal_loss=False)
+    criteria = BCEWithLogitsLoss(pos_weight=pos_weights)
+    # criteria = AsymmetricLossOptimized(gamma_neg=3, gamma_pos=0, clip=0.1, eps=1e-8, disable_torch_grad_focal_loss=False)
 
     #training
     # history = train_teacher(model,
@@ -126,9 +126,11 @@ def main():
 
     return
 
-def evaluate(model,dataset, loss_fn,device,hparam):
+def evaluate(model,dataset, loss_fn,hparam):
     model.eval()
     model = model.cpu()
+    if hparam.wl and isinstance(loss_fn,BCEWithLogitsLoss):
+        loss_fn.pos_weight = loss_fn.pos_weight.cpu()    
     total_loss = 0
     total_iou = []
     dataloader = DataLoader(dataset=dataset,batch_size=hparam.batch_size,shuffle=False)
@@ -194,7 +196,9 @@ def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, 
         logging.info(f'train Loss for epoch {epoch}: {epoch_loss/((len(trainset)//hparam.batch_size)+1):.4f}')
         train_history.append(epoch_loss/((len(trainset)//hparam.batch_size)+1))
 
-        test_mean_loss, intersect_union = evaluate(model=model,dataset=testset,loss_fn=loss_fn,device=device,hparam=hparam)
+        test_mean_loss, intersect_union = evaluate(model=model,dataset=testset,loss_fn=loss_fn,hparam=hparam)
+        if hparam.wl and isinstance(loss_fn,BCEWithLogitsLoss):
+            loss_fn.pos_weight = loss_fn.pos_weight.to(device)
         every_class_acc, overallacc = get_acc(dataset=testset,model=model,thresh=hparam.thresh,device=hparam.device)
         every_class_recall, overallrecall = get_recall(dataset=testset,model=model,thresh=hparam.thresh,device=hparam.device)
         logging.info(f"every class accuracy:{every_class_acc}")
@@ -212,11 +216,11 @@ def training(model, trainset, testset, loss_fn, optimizer,lr_scheduler, device, 
         
         #儲存最佳的模型
         if epoch == 1:
-            criterion = intersect_union
+            criterion = overallrecall
             torch.save(model.state_dict(), hparam.wpath)
             logging.info(f'at epoch {epoch}, BESTMODEL.pth saved!')
-        elif(intersect_union > criterion):
-            criterion = intersect_union
+        elif(overallrecall > criterion):
+            criterion = overallrecall
             torch.save(model.state_dict(),hparam.wpath)
             logging.info(f'at epoch {epoch}, BESTMODEL.pth saved!')
             

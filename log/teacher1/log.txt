@@ -1,0 +1,314 @@
+INFO: training the multiclass model with Cross Entropy Loss
+INFO: Dataset: multiclass_fundus_dataset
+INFO: {'Normal': 0, 'Maculopathy': 1, 'DR': 2, 'RD': 3, 'MH': 4, 'PH': 5}
+INFO: pos_weights: tensor([1., 1., 1., 1., 1., 1.], device='cuda:2')
+INFO: Sequential(
+  (0): Conv(
+    (conv): Conv2d(3, 16, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (1): Conv(
+    (conv): Conv2d(16, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (2): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(32, 32, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(48, 32, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0): Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (3): Conv(
+    (conv): Conv2d(32, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (4): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(128, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0-1): 2 x Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (5): Conv(
+    (conv): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (6): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(128, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0-1): 2 x Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (7): Conv(
+    (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (act): SiLU()
+  )
+  (8): C2f(
+    (cv1): Conv(
+      (conv): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (cv2): Conv(
+      (conv): Conv2d(384, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (m): ModuleList(
+      (0): Bottleneck(
+        (cv1): Conv(
+          (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+        (cv2): Conv(
+          (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+          (bn): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+          (act): SiLU()
+        )
+      )
+    )
+  )
+  (9): Classify(
+    (conv): Conv(
+      (conv): Conv2d(256, 1280, kernel_size=(1, 1), stride=(1, 1), bias=False)
+      (bn): BatchNorm2d(1280, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (act): SiLU()
+    )
+    (pool): AdaptiveAvgPool2d(output_size=1)
+    (drop): Dropout(p=0.0, inplace=True)
+    (linear): Linear(in_features=1280, out_features=6, bias=True)
+  )
+)
+INFO: Starting training teacher model:
+        Model:          yolov8
+        Optimizer:      AdamW
+        Epochs:         50
+        Batch size:     25
+        Training size:  247
+        Testing size:   61
+        Image size:     512
+        Device:         cuda
+        Initial learning rate:  0.001
+    
+INFO: train Loss for epoch 1: 1.4274
+INFO: test_mean_loss: 1.6837
+INFO: acc: 0.3418
+INFO: at epoch 1, BESTMODEL.pth saved!
+INFO: train Loss for epoch 2: 1.2319
+INFO: test_mean_loss: 1.6170
+INFO: acc: 0.3418
+INFO: at epoch 2, BESTMODEL.pth saved!
+INFO: train Loss for epoch 3: 1.1283
+INFO: test_mean_loss: 1.4977
+INFO: acc: 0.4085
+INFO: at epoch 3, BESTMODEL.pth saved!
+INFO: train Loss for epoch 4: 1.0665
+INFO: test_mean_loss: 2.0003
+INFO: acc: 0.3406
+INFO: train Loss for epoch 5: 1.0281
+INFO: test_mean_loss: 1.6329
+INFO: acc: 0.5188
+INFO: train Loss for epoch 6: 1.0388
+INFO: test_mean_loss: 1.1743
+INFO: acc: 0.6691
+INFO: at epoch 6, BESTMODEL.pth saved!
+INFO: train Loss for epoch 7: 1.0183
+INFO: test_mean_loss: 1.0908
+INFO: acc: 0.5855
+INFO: at epoch 7, BESTMODEL.pth saved!
+INFO: train Loss for epoch 8: 0.9369
+INFO: test_mean_loss: 1.1502
+INFO: acc: 0.7261
+INFO: train Loss for epoch 9: 0.9617
+INFO: test_mean_loss: 1.3452
+INFO: acc: 0.4582
+INFO: train Loss for epoch 10: 0.9387
+INFO: test_mean_loss: 1.1714
+INFO: acc: 0.7091
+INFO: train Loss for epoch 11: 0.8862
+INFO: test_mean_loss: 1.2341
+INFO: acc: 0.5152
+INFO: train Loss for epoch 12: 0.8530
+INFO: test_mean_loss: 1.0175
+INFO: acc: 0.7091
+INFO: at epoch 12, BESTMODEL.pth saved!
+INFO: train Loss for epoch 13: 0.7897
+INFO: test_mean_loss: 0.9783
+INFO: acc: 0.6655
+INFO: at epoch 13, BESTMODEL.pth saved!
+INFO: train Loss for epoch 14: 0.8126
+INFO: test_mean_loss: 1.0575
+INFO: acc: 0.6655
+INFO: train Loss for epoch 15: 0.7799
+INFO: test_mean_loss: 1.0324
+INFO: acc: 0.6618
+INFO: train Loss for epoch 16: 0.8124
+INFO: test_mean_loss: 1.2259
+INFO: acc: 0.6824
+INFO: train Loss for epoch 17: 0.7923
+INFO: test_mean_loss: 1.3489
+INFO: acc: 0.5818
+INFO: train Loss for epoch 18: 0.8327
+INFO: test_mean_loss: 1.0664
+INFO: acc: 0.6255
+INFO: train Loss for epoch 19: 0.7434
+INFO: test_mean_loss: 0.9932
+INFO: acc: 0.6655
+INFO: train Loss for epoch 20: 0.7187
+INFO: test_mean_loss: 1.0199
+INFO: acc: 0.6352
+INFO: train Loss for epoch 21: 0.6796
+INFO: test_mean_loss: 0.9739
+INFO: acc: 0.6958
+INFO: at epoch 21, BESTMODEL.pth saved!
+INFO: train Loss for epoch 22: 0.6999
+INFO: test_mean_loss: 0.9989
+INFO: acc: 0.6958
+INFO: train Loss for epoch 23: 0.6827
+INFO: test_mean_loss: 1.0487
+INFO: acc: 0.6558
+INFO: train Loss for epoch 24: 0.6389
+INFO: test_mean_loss: 0.9770
+INFO: acc: 0.6958
+INFO: train Loss for epoch 25: 0.6533
+INFO: test_mean_loss: 1.0391
+INFO: acc: 0.6485
+INFO: train Loss for epoch 26: 0.6461
+INFO: test_mean_loss: 1.0594
+INFO: acc: 0.6388
+INFO: train Loss for epoch 27: 0.6418
+INFO: test_mean_loss: 1.0905
+INFO: acc: 0.6388
+INFO: train Loss for epoch 28: 0.5743
+INFO: test_mean_loss: 1.0724
+INFO: acc: 0.6824
+INFO: train Loss for epoch 29: 0.6028
+INFO: test_mean_loss: 1.0394
+INFO: acc: 0.6388
+INFO: train Loss for epoch 30: 0.5570
+INFO: test_mean_loss: 1.0189
+INFO: acc: 0.6958
+INFO: train Loss for epoch 31: 0.6015
+INFO: test_mean_loss: 1.0215
+INFO: acc: 0.7127
+INFO: train Loss for epoch 32: 0.5474
+INFO: test_mean_loss: 1.1122
+INFO: acc: 0.6691
+INFO: train Loss for epoch 33: 0.5008
+INFO: test_mean_loss: 1.0498
+INFO: acc: 0.6861
+INFO: train Loss for epoch 34: 0.5244
+INFO: test_mean_loss: 1.0241
+INFO: acc: 0.7127
+INFO: train Loss for epoch 35: 0.5114
+INFO: test_mean_loss: 1.0616
+INFO: acc: 0.7127
+INFO: train Loss for epoch 36: 0.5650
+INFO: test_mean_loss: 1.0833
+INFO: acc: 0.6958
+INFO: train Loss for epoch 37: 0.4880
+INFO: test_mean_loss: 1.0698
+INFO: acc: 0.7127
+INFO: train Loss for epoch 38: 0.4697
+INFO: test_mean_loss: 1.0639
+INFO: acc: 0.7127
+INFO: train Loss for epoch 39: 0.5182
+INFO: test_mean_loss: 1.0530
+INFO: acc: 0.7127
+INFO: train Loss for epoch 40: 0.4701
+INFO: test_mean_loss: 1.0630
+INFO: acc: 0.7127
+INFO: train Loss for epoch 41: 0.4938
+INFO: test_mean_loss: 1.0665
+INFO: acc: 0.7127
+INFO: train Loss for epoch 42: 0.4465
+INFO: test_mean_loss: 1.0569
+INFO: acc: 0.7261
+INFO: train Loss for epoch 43: 0.5971
+INFO: test_mean_loss: 1.0565
+INFO: acc: 0.7127
+INFO: train Loss for epoch 44: 0.5352
+INFO: test_mean_loss: 1.0624
+INFO: acc: 0.6994
+INFO: train Loss for epoch 45: 0.5276
+INFO: test_mean_loss: 1.0647
+INFO: acc: 0.7127
+INFO: train Loss for epoch 46: 0.4682
+INFO: test_mean_loss: 1.0649
+INFO: acc: 0.7127
+INFO: train Loss for epoch 47: 0.4548
+INFO: test_mean_loss: 1.0814
+INFO: acc: 0.7127
+INFO: train Loss for epoch 48: 0.4853
+INFO: test_mean_loss: 1.0651
+INFO: acc: 0.7127
+INFO: train Loss for epoch 49: 0.4771
+INFO: test_mean_loss: 1.0542
+INFO: acc: 0.7127
+INFO: train Loss for epoch 50: 0.4237
+INFO: test_mean_loss: 1.0551
+INFO: acc: 0.7127
