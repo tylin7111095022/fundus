@@ -1,28 +1,49 @@
-#!/home/tsungyu/fundus/env/bin/python
-
 import cv2
 import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+import albumentations as A
 
 def main():
-    img_transform()
+    start = time.time()
+    # gamma correction
+    # root = "multi_labels_Final_0911_clean_1000_gamma16_reverse"
+    # for folder, dir_list, files in os.walk(root):
+    #     for f in files:
+    #         img_path = os.path.join(folder, f)
+    #         gamma_correction(imgpath=img_path, gamma=1/(1.6))
 
-    #pick the fixed pic to observe
-    #filepath="./val/Retinopathy/20060411_61808_0200_PP.jpg"
-    #img = cv2.imread(filepath,cv2.IMREAD_GRAYSCALE)
-    #print(img)
-    #print(f"max_img_value: {np.max(img)}, min_img_value: {np.min(img)}")
-    #cv2.imshow(filepath,img)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
-    #array = cal_hist(img,if_plot=True)
-    #most_value = np.argmax(array)
-    #print(most_value)
+    transform = A.Compose([
+            A.augmentations.geometric.rotate.Rotate(limit=20, border_mode=cv2.BORDER_CONSTANT,value=0, p=1.0, crop_border=True),
+            A.HorizontalFlip(p=0.7),
+            A.RandomBrightnessContrast(brightness_limit=[-0.1, 0.3], contrast_limit=0.2, brightness_by_max=True, always_apply=False, p=1.0),
+    ])
+    augment(root="multi_labels_Final_0911_clean_1000_gamma16\\RVO", transform=transform)
+
+    end = time.time()
+
+    print(f"spend {end-start} second")
 
     return 0
 
+def augment(root, transform):
+    """transform must use albumentations module"""
+    # transform = A.Compose([
+    #         A.augmentations.geometric.rotate.Rotate(limit=20, border_mode=cv2.BORDER_CONSTANT,value=0, p=1.0, crop_border=True),
+    #         A.HorizontalFlip(p=0.7),
+    #         A.RandomBrightnessContrast(brightness_limit=[-0.1, 0.3], contrast_limit=0.2, brightness_by_max=True, always_apply=False, p=1.0),
+    # ])
+    for folder, dir_list, files in os.walk(root):
+        for f in files:
+            print(f)
+            img_path = os.path.join(folder, f)
+            img = cv2.imread(img_path,cv2.IMREAD_UNCHANGED)
+            transformed_image = transform(image = img)["image"]
+            newname = f"aug_{f}"
+            cv2.imwrite(os.path.join(folder, newname), transformed_image)    
+    return
     
 def img_transform():
     if len(sys.argv) < 2 :
@@ -33,9 +54,6 @@ def img_transform():
         sys.exit()
 
     dataset_path = sys.argv[1]
-    #transform = A.Compose([
-    #    A.Sharpen(alpha=(0.2, 0.5), lightness=(0.5, 1.0), always_apply=True, p=0.5),
-    #])
 
     for dirpath, dirnames, filenames in os.walk(dataset_path):
         for f in filenames:
@@ -101,6 +119,16 @@ def clahe(imgpath:str,clipLimit:float=2.5, tileGridSize:tuple=(16,16),show_pic:b
         cv2.destroyAllWindows()
 
     return after_img
+
+def gamma_correction(imgpath:str, gamma:float):
+    img = cv2.imread(imgpath,cv2.IMREAD_UNCHANGED)
+    img = img / 255 #normalize to [0,1]
+    
+    img = np.power(img, gamma)
+    img = np.round(img*255)
+
+    cv2.imwrite(f"{imgpath}", img)
+    return
 
 if __name__ == "__main__":
     main()
