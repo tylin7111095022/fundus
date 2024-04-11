@@ -7,29 +7,32 @@ from torchvision import transforms
 from tqdm import tqdm
 import logging
 import matplotlib.pyplot as plt
-from torch.nn import BCEWithLogitsLoss
+
 import yaml
+from typing import Optional
 #custom
 from config.fundusdataset import Fundusdataset, split_dataset
-from config.models import SPNet, ResGCNet, AsymmetricLossOptimized, initialize_model, get_optim
+from models import initialize_model, get_optim
+from models.loss import get_loss_fn
 
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_name", type=str, dest='mname', default='yolov8', help='deep learning model will be used')
+    parser.add_argument("--model_name", type=str, dest='mname', default='mldecoder', help='deep learning model will be used')
+    parser.add_argument("--loss", choices=["asl", "bce"],default="asl", help='loss function when training')
     parser.add_argument("--optim", type=str, default='AdamW', help='optimizer')
     parser.add_argument("--in_channel", type=int, default=3, dest="inch",help="the number of input channel of model")
-    parser.add_argument("--img_size", type=int, default=512,help="image size")
-    parser.add_argument("--nclass", type=int, default=6,help="the number of class for classification task")
-    parser.add_argument("--num_workers", type=int, default=8, help="num_workers > 0 turns on multi-process data loading")
+    parser.add_argument("--img_size", type=int, default=96,help="image size")
+    parser.add_argument("--nclass", type=int, default=3,help="the number of class for classification task")
+    parser.add_argument("--num_workers", type=int, default=0, help="num_workers > 0 turns on multi-process data loading")
     parser.add_argument("--epoches", type=int, default=50, help="Number of training epochs")
-    parser.add_argument("--batch_size", type=int, default=25, help="Batch size during training")
-    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for optimizer")
+    parser.add_argument("--batch_size", type=int, default=5, help="Batch size during training")
+    parser.add_argument("--lr", type=float, default=2e-3, help="Learning rate for optimizer")
     parser.add_argument("--threshold", type=float, default=0.5, dest="thresh",help="the threshold of that predicting if belong the class")
     parser.add_argument("--weight_path", type=str,dest='wpath', default='./best.pth', help="path of model we trained best")
     parser.add_argument("--is_parallel", type=bool, default=False, dest="paral",help="parallel calculation at multiple gpus")
-    parser.add_argument("--device", type=str, default='cuda:2', help='device trainging deep learning')
-    parser.add_argument("--weighted_loss", type=bool,dest="wl", default=True, help='balance the loss between pos and neg')
+    parser.add_argument("--device", type=str, default='cpu', help='device trainging deep learning')
+    # parser.add_argument("--weighted_loss", type=bool,dest="wl", default=False, help='balance the loss between pos and neg')
     return parser.parse_args()
 
 def main():
@@ -51,28 +54,27 @@ def main():
     logger.addHandler(fh)
     
     hparam = get_args()
+    logging.info(hparam)
     # TRANSPIPE = transforms.Compose([transforms.Resize((hparam.img_size,hparam.img_size))])
 
     #資料隨機分選訓練、測試集
-    fundus_dataset = Fundusdataset("dataset_multilabel_DR1addNormal",transforms=None, imgsize=hparam.img_size)
+    fundus_dataset = Fundusdataset("./data/train",transforms=None, imgsize=hparam.img_size)
     trainset, testset = split_dataset(fundus_dataset,test_ratio=0.2,seed=20230823)
     logging.info(fundus_dataset.class2ndx)
     # 計算每個標籤的正負樣本比
-    if hparam.wl:
-        pos_count = torch.zeros(hparam.nclass)
-        all_count = torch.zeros(hparam.nclass)
-        for i in range(len(trainset)):
-            pos_count += trainset[i][1]
-            all_count += torch.ones(hparam.nclass)
-        neg_count = all_count - pos_count
-        pos_weights = (neg_count / pos_count).to(hparam.device)
-    else:
-        pos_weights = torch.ones(hparam.nclass).to(hparam.device)
-    logging.info(f"pos_weights: {pos_weights}")
+    # if hparam.wl:
+    #     pos_count = torch.zeros(hparam.nclass)
+    #     all_count = torch.zeros(hparam.nclass)
+    #     for i in range(len(trainset)):
+    #         pos_count += trainset[i][1]
+    #         all_count += torch.ones(hparam.nclass)
+    #     neg_count = all_count - pos_count
+    #     pos_weights = (neg_count / pos_count).to(hparam.device)
+    # else:
+    #     pos_weights = torch.ones(hparam.nclass).to(hparam.device)
+    # logging.info(f"pos_weights: {pos_weights}")
 
-        
-    # model = get_model(model_name=hparam.mname,in_ch=hparam.inch,img_shape=(hparam.img_size,hparam.img_size),num_class=hparam.nclass)
-    model = initialize_model(hparam.mname,num_classes=hparam.nclass,use_pretrained=True)
+    model = initialize_model(hparam.mname,num_classes=hparam.nclass,use_pretrained=True,use_custom_clf=True)
     if torch.cuda.device_count() > 1 and hparam.paral:
           logging.info(f"use {torch.cuda.device_count()} GPUs!")
           model = torch.nn.DataParallel(model)
@@ -86,8 +88,7 @@ def main():
                                                               min_lr=1e-6,
                                                               verbose =True)
     device = torch.device( hparam.device if torch.cuda.is_available() else 'cpu')
-    criteria = BCEWithLogitsLoss(pos_weight=pos_weights)
-    # criteria = AsymmetricLossOptimized()
+    criteria = get_loss_fn(hparam.loss)
 
     #training
     history = training(model,trainset, testset, criteria, optimizer,lr_scheduler, device, hparam)
@@ -224,16 +225,7 @@ def plot_history(trainingloss:list,validationloss:list, saved:bool=False,figname
 
     return
 
-def get_model(model_name:str, in_ch=2,filters=32,num_class=5,img_shape:tuple=(2048,2048)):
-    '''model_name 必須是 spnet 或 resgcnet'''
-    if model_name == 'spnet':
-        return SPNet(in_ch=in_ch, num_class=num_class,img_shape=img_shape,filters=filters)
-    elif model_name == 'resgcnet':
-        return ResGCNet(in_ch=in_ch, num_class=num_class,img_shape=img_shape,filters=filters)
-    else:
-        print(f'Don\'t find the model: {model_name} .')
-
-def acc_every_class(dataset:[str | Fundusdataset],model, device, thresh:float=0.5, transforms=None,)->dict:
+def acc_every_class(dataset:Fundusdataset,model, device, thresh:float=0.5, transforms=None,)->dict:
     model = model.to(device) 
     if isinstance (dataset,str):
         ds = Fundusdataset(dataset,transforms=transforms)
