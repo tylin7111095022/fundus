@@ -6,7 +6,7 @@ from random import random
 from pathlib import Path
 import json
 from torchvision import transforms
-from .utils import Resize, Padding
+from utils import Resize, Padding
 
 def get_image_multilabel(root):
     class_name = os.listdir(root)

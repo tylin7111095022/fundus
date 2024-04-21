@@ -9,3 +9,8 @@ log
 env/
 
 config/__pycache__
+
+__pycache__
+
+*.png
+*.jpg

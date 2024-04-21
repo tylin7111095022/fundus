@@ -11,27 +11,28 @@ import matplotlib.pyplot as plt
 import yaml
 from typing import Optional
 #custom
-from config.fundusdataset import Fundusdataset, split_dataset
+from fundusdataset import Fundusdataset, split_dataset
 from models import initialize_model, get_optim
 from models.loss import get_loss_fn
+from utils import adjust_lr, cosine_decay_with_warmup
 
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_name", type=str, dest='mname', default='mldecoder', help='deep learning model will be used')
+    parser.add_argument("--model_name", type=str, dest='mname', default='resnet152', help='deep learning model will be used')
     parser.add_argument("--loss", choices=["asl", "bce"],default="asl", help='loss function when training')
     parser.add_argument("--optim", type=str, default='AdamW', help='optimizer')
     parser.add_argument("--in_channel", type=int, default=3, dest="inch",help="the number of input channel of model")
-    parser.add_argument("--img_size", type=int, default=96,help="image size")
+    parser.add_argument("--img_size", type=int, default=512,help="image size")
     parser.add_argument("--nclass", type=int, default=3,help="the number of class for classification task")
-    parser.add_argument("--num_workers", type=int, default=0, help="num_workers > 0 turns on multi-process data loading")
+    parser.add_argument("--num_workers", type=int, default=4, help="num_workers > 0 turns on multi-process data loading")
     parser.add_argument("--epoches", type=int, default=50, help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=5, help="Batch size during training")
     parser.add_argument("--lr", type=float, default=2e-3, help="Learning rate for optimizer")
     parser.add_argument("--threshold", type=float, default=0.5, dest="thresh",help="the threshold of that predicting if belong the class")
     parser.add_argument("--weight_path", type=str,dest='wpath', default='./best.pth', help="path of model we trained best")
     parser.add_argument("--is_parallel", type=bool, default=False, dest="paral",help="parallel calculation at multiple gpus")
-    parser.add_argument("--device", type=str, default='cpu', help='device trainging deep learning')
+    parser.add_argument("--device", type=str, default='cuda:0', help='device trainging deep learning')
     # parser.add_argument("--weighted_loss", type=bool,dest="wl", default=False, help='balance the loss between pos and neg')
     return parser.parse_args()
 
