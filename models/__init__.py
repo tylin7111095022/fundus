@@ -2,6 +2,7 @@ import torch
 from .resgcnet import *
 from .ml_decoder import MLDecoder
 from torchvision import models
+import timm
 from models.unet import Encoder
 # 當創建新環境時，需要將ultralytics/nn/modules內的Classify class做更動
 from ultralytics.nn.tasks import ClassificationModel
@@ -33,74 +34,77 @@ def initialize_model(model_name, num_classes,use_custom_clf=True, use_pretrained
     if model_name == "resnet":
         """ Resnet50
         """
-        model_ft = models.resnet50(pretrained=use_pretrained)
+        model_ft = timm.create_model('resnet50',pretrained=True)
         num_ftrs = model_ft.fc.in_features
         if use_custom_clf:
-            model_ft.fc = Classifier(num_ftrs, num_classes,reduction_rate=4)
+            # model_ft.fc = Classifier(num_ftrs, num_classes,reduction_rate=4)
+            model_ft.global_pool = nn.Identity()
+            model_ft.fc = MLDecoder(num_classes)
         else:
             model_ft.fc = nn.Linear(num_ftrs, num_classes)
 
     elif model_name == "resnet152":
         """ Resnet152
         """
-        model_ft = models.resnet152(pretrained=use_pretrained)
+        model_ft = timm.create_model('resnet152',pretrained=True)
         num_ftrs = model_ft.fc.in_features
         if use_custom_clf:
-            model_ft.fc = Classifier(num_ftrs, num_classes,reduction_rate=4)
+            model_ft.global_pool = nn.Identity()
+            model_ft.fc = MLDecoder(num_classes)
         else:
             model_ft.fc = nn.Linear(num_ftrs, num_classes)
 
-    elif model_name == "alexnet":
-        """ Alexnet
-        """
-        model_ft = models.alexnet(pretrained=use_pretrained)
-        num_ftrs = model_ft.classifier[6].in_features
-        if use_custom_clf:
-            model_ft.classifier[6] = Classifier(num_ftrs, num_classes,reduction_rate=4)
-        else:
-            model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)
+    # elif model_name == "alexnet":
+    #     """ Alexnet
+    #     """
+    #     model_ft = models.alexnet(pretrained=use_pretrained)
+    #     num_ftrs = model_ft.classifier[6].in_features
+    #     if use_custom_clf:
+    #         model_ft.classifier[6] = Classifier(num_ftrs, num_classes,reduction_rate=4)
+    #     else:
+    #         model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)
 
-    elif model_name == "vgg":
-        """ VGG11_bn
-        """
-        model_ft = models.vgg11_bn(pretrained=use_pretrained)
-        num_ftrs = model_ft.classifier[6].in_features
-        if use_custom_clf:
-            model_ft.classifier[6] = Classifier(num_ftrs, num_classes,reduction_rate=4)
-        else:
-            model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)
+    # elif model_name == "vgg":
+    #     """ VGG11_bn
+    #     """
+    #     model_ft = models.vgg11_bn(pretrained=use_pretrained)
+    #     num_ftrs = model_ft.classifier[6].in_features
+    #     if use_custom_clf:
+    #         model_ft.classifier[6] = Classifier(num_ftrs, num_classes,reduction_rate=4)
+    #     else:
+    #         model_ft.classifier[6] = nn.Linear(num_ftrs,num_classes)
 
-    elif model_name == "squeezenet":
-        """ Squeezenet
-        """
-        model_ft = models.squeezenet1_0(pretrained=use_pretrained)
-        model_ft.classifier[1] = Classifier(num_ftrs, num_classes,reduction_rate=4)
-        model_ft.num_classes = num_classes
+    # elif model_name == "squeezenet":
+    #     """ Squeezenet
+    #     """
+    #     model_ft = models.squeezenet1_0(pretrained=use_pretrained)
+    #     model_ft.classifier[1] = Classifier(num_ftrs, num_classes,reduction_rate=4)
+    #     model_ft.num_classes = num_classes
 
-    elif model_name == "densenet":
-        """ Densenet
-        """
-        model_ft = models.densenet121(pretrained=use_pretrained)
-        num_ftrs = model_ft.classifier.in_features
-        if use_custom_clf:
-            model_ft.classifier = Classifier(num_ftrs, num_classes,reduction_rate=4)
-        else:
-            model_ft.classifier = nn.Linear(num_ftrs, num_classes)
+    # elif model_name == "densenet":
+    #     """ Densenet
+    #     """
+    #     model_ft = models.densenet121(pretrained=use_pretrained)
+    #     num_ftrs = model_ft.classifier.in_features
+    #     if use_custom_clf:
+    #         model_ft.classifier = Classifier(num_ftrs, num_classes,reduction_rate=4)
+    #     else:
+    #         model_ft.classifier = nn.Linear(num_ftrs, num_classes)
 
-    elif model_name == "inception":
-        """ Inception v3
-        Be careful, expects (299,299) sized images and has auxiliary output
-        """
-        model_ft = models.inception_v3(pretrained=use_pretrained)
-        # Handle the auxilary net
-        num_ftrs = model_ft.AuxLogits.fc.in_features
-        model_ft.AuxLogits.fc = nn.Linear(num_ftrs, num_classes)
-        # Handle the primary net
-        num_ftrs = model_ft.fc.in_features
-        if use_custom_clf:
-            model_ft.fc = Classifier(num_ftrs, num_classes,reduction_rate=4)
-        else:
-            model_ft.fc = nn.Linear(num_ftrs,num_classes)
+    # elif model_name == "inception":
+    #     """ Inception v3
+    #     Be careful, expects (299,299) sized images and has auxiliary output
+    #     """
+    #     model_ft = models.inception_v3(pretrained=use_pretrained)
+    #     # Handle the auxilary net
+    #     num_ftrs = model_ft.AuxLogits.fc.in_features
+    #     model_ft.AuxLogits.fc = nn.Linear(num_ftrs, num_classes)
+    #     # Handle the primary net
+    #     num_ftrs = model_ft.fc.in_features
+    #     if use_custom_clf:
+    #         model_ft.fc = Classifier(num_ftrs, num_classes,reduction_rate=4)
+    #     else:
+    #         model_ft.fc = nn.Linear(num_ftrs,num_classes)
     
     elif model_name == "yolov8":
         """Yolov8 by ultralytic, please install the mudule ultralytic first"""
